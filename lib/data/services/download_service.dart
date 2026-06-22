@@ -86,6 +86,8 @@ class DownloadService {
 
   Future<void> shareStatus(StatusFile status) async {
     final file = XFile(status.filePath);
-    await Share.shareXFiles([file], text: 'Shared via Statuses');
+    await SharePlus.instance.share(
+      ShareParams(files: [file], text: 'Shared via Statuses'),
+    );
   }
 }

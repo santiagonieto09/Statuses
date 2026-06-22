@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:statuses/constants/app_constants.dart';
 import 'package:statuses/providers/download_notifier.dart';
+import 'package:statuses/providers/status_notifier.dart';
 import 'package:statuses/ui/screens/status_detail_screen.dart';
 import 'package:statuses/ui/widgets/empty_state.dart';
 import 'package:statuses/ui/widgets/shimmer_loading.dart';
@@ -109,13 +110,15 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
 
         // Contenido principal
         Expanded(
-          child: Consumer<DownloadNotifier>(
-            builder: (context, notifier, _) {
-              if (notifier.isSavedLoading) {
-                return const ShimmerLoading(isGrid: true);
+          child: Consumer2<StatusNotifier, DownloadNotifier>(
+            builder: (context, statusNotifier, downloadNotifier, _) {
+              final isGrid = statusNotifier.viewMode == ViewMode.grid;
+
+              if (downloadNotifier.isSavedLoading) {
+                return ShimmerLoading(isGrid: isGrid);
               }
 
-              if (!notifier.hasSaved) {
+              if (!downloadNotifier.hasSaved) {
                 return const EmptyState(
                   title: 'No saved statuses',
                   subtitle:
@@ -126,44 +129,18 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
 
               return RefreshIndicator(
                 onRefresh: _isSelecting
-                    ? () async {} // bloquea el pull-to-refresh en modo selección
-                    : () => notifier.loadSavedStatuses(),
+                    ? () async {} // bloquea el pull-to-refresh en modo seleccion
+                    : () => downloadNotifier.loadSavedStatuses(),
                 child: CustomScrollView(
                   slivers: [
-                    SliverToBoxAdapter(child: _buildHeader(context, notifier)),
+                    SliverToBoxAdapter(
+                      child: _buildHeader(context, downloadNotifier),
+                    ),
                     SliverPadding(
                       padding: const EdgeInsets.all(4),
-                      sliver: SliverGrid(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: _crossAxisCount(context),
-                          crossAxisSpacing: 4,
-                          mainAxisSpacing: 4,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final status = notifier.savedStatuses[index];
-                            final isSelected =
-                                _selectedPaths.contains(status.filePath);
-
-                            return StatusThumbnailCard(
-                              status: status,
-                              isSelected: isSelected,
-                              onLongPress: () => _onLongPress(status.filePath),
-                              onTap: _isSelecting
-                                  ? () => _toggleSelection(status.filePath)
-                                  : () => Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (_) => StatusDetailScreen(
-                                            statuses: notifier.savedStatuses,
-                                            initialIndex: index,
-                                          ),
-                                        ),
-                                      ),
-                            );
-                          },
-                          childCount: notifier.savedStatuses.length,
-                        ),
-                      ),
+                      sliver: isGrid
+                          ? _buildGrid(context, downloadNotifier)
+                          : _buildList(context, downloadNotifier),
                     ),
                   ],
                 ),
@@ -214,6 +191,69 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
           ),
         ],
       ),
+    );
+  }
+
+  // Construye el delegate compartido para grid y lista
+  SliverChildBuilderDelegate _itemDelegate(
+    BuildContext context,
+    DownloadNotifier notifier, {
+    required bool isList,
+  }) {
+    return SliverChildBuilderDelegate(
+      (context, index) {
+        final status = notifier.savedStatuses[index];
+        final isSelected = _selectedPaths.contains(status.filePath);
+
+        void onTap() {
+          if (_isSelecting) {
+            _toggleSelection(status.filePath);
+          } else {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => StatusDetailScreen(
+                  statuses: notifier.savedStatuses,
+                  initialIndex: index,
+                ),
+              ),
+            );
+          }
+        }
+
+        void onLongPress() => _onLongPress(status.filePath);
+
+        return isList
+            ? StatusListItem(
+                status: status,
+                isSelected: isSelected,
+                onLongPress: onLongPress,
+                onTap: onTap,
+              )
+            : StatusThumbnailCard(
+                status: status,
+                isSelected: isSelected,
+                onLongPress: onLongPress,
+                onTap: onTap,
+              );
+      },
+      childCount: notifier.savedStatuses.length,
+    );
+  }
+
+  Widget _buildGrid(BuildContext context, DownloadNotifier notifier) {
+    return SliverGrid(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: _crossAxisCount(context),
+        crossAxisSpacing: 4,
+        mainAxisSpacing: 4,
+      ),
+      delegate: _itemDelegate(context, notifier, isList: false),
+    );
+  }
+
+  Widget _buildList(BuildContext context, DownloadNotifier notifier) {
+    return SliverList(
+      delegate: _itemDelegate(context, notifier, isList: true),
     );
   }
 

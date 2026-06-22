@@ -167,23 +167,54 @@ class StatusThumbnailCard extends StatelessWidget {
 class StatusListItem extends StatelessWidget {
   final StatusFile status;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final bool isSelected;
 
   const StatusListItem({
     super.key,
     required this.status,
     this.onTap,
+    this.onLongPress,
+    this.isSelected = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(AppShapes.smallRadius),
-        child: SizedBox(
-          width: 48,
-          height: 48,
-          child: _buildLeadingImage(context),
-        ),
+      tileColor: isSelected ? Colors.green.withValues(alpha: 0.15) : null,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      leading: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppShapes.smallRadius),
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: _buildLeadingImage(context),
+            ),
+          ),
+          // Indicador de seleccion en esquina inferior derecha del thumbnail
+          if (isSelected)
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: Colors.green.shade600,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: const Icon(
+                  Icons.check_rounded,
+                  color: Colors.white,
+                  size: 11,
+                ),
+              ),
+            ),
+        ],
       ),
       title: Text(
         status.fileNameWithoutExtension,
@@ -202,7 +233,6 @@ class StatusListItem extends StatelessWidget {
         ],
       ),
       trailing: _buildTrailingIcon(context),
-      onTap: onTap,
     );
   }
 

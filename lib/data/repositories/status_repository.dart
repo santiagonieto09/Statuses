@@ -11,12 +11,18 @@ class StatusRepository {
       : _safService = safService ?? SafService();
 
   /// Descubre las rutas directas accesibles en el sistema de archivos.
+  /// Resuelve la ruta canónica de cada directorio para evitar duplicados en
+  /// filesystems case-insensitive (común en /storage/emulated/0/ de Android).
   Future<List<String>> _discoverDirectories() async {
+    final seen = <String>{};
     final dirs = <String>[];
     for (final path in AppConstants.whatsappStatusPaths) {
       final dir = Directory(path);
       if (await dir.exists()) {
-        dirs.add(path);
+        final canonical = await dir.resolveSymbolicLinks();
+        if (seen.add(canonical)) {
+          dirs.add(path);
+        }
       }
     }
     return dirs;

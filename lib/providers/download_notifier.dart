@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:statuses/data/models/status_file.dart';
 import 'package:statuses/data/services/download_service.dart';
@@ -73,6 +75,21 @@ class DownloadNotifier extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Elimina los archivos guardados especificados del dispositivo y recarga la lista.
+  /// Ignora errores individuales para no detener la eliminación del resto.
+  Future<void> deleteSavedStatuses(List<String> paths) async {
+    for (final path in paths) {
+      try {
+        final file = File(path);
+        if (await file.exists()) await file.delete();
+      } catch (_) {
+        // Ignorar errores individuales, continuar con el resto
+      }
+    }
+    await _loadSaved();
+    notifyListeners();
   }
 
   void clearState() {

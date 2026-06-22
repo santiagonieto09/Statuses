@@ -9,17 +9,22 @@ import 'package:statuses/utils/file_utils.dart';
 class StatusThumbnailCard extends StatelessWidget {
   final StatusFile status;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+  final bool isSelected;
 
   const StatusThumbnailCard({
     super.key,
     required this.status,
     this.onTap,
+    this.onLongPress,
+    this.isSelected = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -33,6 +38,36 @@ class StatusThumbnailCard extends StatelessWidget {
               right: 4,
               child: _buildBadge(context),
             ),
+          if (isSelected) ...[
+            // Overlay verde semi-transparente sobre toda la card
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppShapes.smallRadius),
+              child: Container(color: Colors.green.withValues(alpha: 0.4)),
+            ),
+            // Borde verde
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.green.shade600, width: 2.5),
+                borderRadius: BorderRadius.circular(AppShapes.smallRadius),
+              ),
+            ),
+            // Circulo con check en la esquina superior izquierda
+            Positioned(
+              top: 6,
+              left: 6,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: Colors.green.shade600,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: const Icon(Icons.check_rounded,
+                    color: Colors.white, size: 14),
+              ),
+            ),
+          ],
         ],
       ),
     );

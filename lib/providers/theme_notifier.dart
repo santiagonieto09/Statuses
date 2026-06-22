@@ -14,8 +14,14 @@ class ThemeNotifier extends ChangeNotifier {
 
   Future<void> _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    final index = prefs.getInt(_key) ?? ThemeMode.system.index;
-    _themeMode = ThemeMode.values[index];
+    final saved = prefs.getInt(_key);
+    if (saved == null) {
+      _themeMode = ThemeMode.light;
+    } else {
+      _themeMode = ThemeMode.values[saved];
+      // Migrar ThemeMode.system a light para mantener solo 2 estados
+      if (_themeMode == ThemeMode.system) _themeMode = ThemeMode.light;
+    }
     notifyListeners();
   }
 
@@ -27,13 +33,10 @@ class ThemeNotifier extends ChangeNotifier {
   }
 
   Future<void> toggleTheme() async {
-    switch (_themeMode) {
-      case ThemeMode.system:
-        await setThemeMode(ThemeMode.light);
-      case ThemeMode.light:
-        await setThemeMode(ThemeMode.dark);
-      case ThemeMode.dark:
-        await setThemeMode(ThemeMode.system);
+    if (_themeMode == ThemeMode.dark) {
+      await setThemeMode(ThemeMode.light);
+    } else {
+      await setThemeMode(ThemeMode.dark);
     }
   }
 }

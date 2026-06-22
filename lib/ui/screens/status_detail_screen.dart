@@ -244,9 +244,16 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
           final notifier = context.read<DownloadNotifier>();
           await notifier.downloadStatus(widget.status);
           if (context.mounted) {
+            final success = notifier.error == null;
+            final msg = success
+                ? '\u2713 Guardado en Pictures/Statuses'
+                : notifier.error!;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(notifier.error ?? 'Downloaded successfully'),
+                content: Text(msg),
+                backgroundColor: success ? Colors.green[700] : Colors.red[700],
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 3),
               ),
             );
           }

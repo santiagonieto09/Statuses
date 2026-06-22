@@ -3,6 +3,7 @@ package com.statuses.statuses
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Environment
 import androidx.documentfile.provider.DocumentFile
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -110,6 +111,14 @@ class MainActivity : FlutterActivity() {
                         } catch (e: Exception) {
                             result.error("SAF_ERROR", e.message, null)
                         }
+                    }
+
+                    // Devuelve la ruta del directorio publico Pictures del almacenamiento primario
+                    "getPublicPicturesPath" -> {
+                        val dir = Environment.getExternalStoragePublicDirectory(
+                            Environment.DIRECTORY_PICTURES
+                        )
+                        result.success(dir.absolutePath)
                     }
 
                     else -> result.notImplemented()

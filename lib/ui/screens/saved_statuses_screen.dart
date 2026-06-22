@@ -40,7 +40,7 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
           return const EmptyState(
             title: 'No saved statuses',
             subtitle:
-                'Los estados que descargues aparecerán aquí.\nSe guardan en Pictures/Statuses.',
+                'Los estados que descargues aparecerán aquí.',
             icon: Icons.download_rounded,
           );
         }

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:statuses/constants/app_constants.dart';
@@ -7,20 +6,11 @@ import 'package:statuses/data/models/status_file.dart';
 import 'package:statuses/utils/file_utils.dart';
 
 class DownloadService {
-  static const _channel = MethodChannel('com.statuses.statuses/saf');
-
   /// Devuelve la ruta del directorio público donde se guardan los estados.
   /// En Android usa Pictures/Statuses (visible en Galería y Archivos).
-  /// Si el canal nativo falla, deriva la ruta desde el directorio privado de la app.
+  /// Deriva la ruta desde el directorio privado de la app vía pure Dart.
   Future<String> getDownloadDirectory() async {
-    String basePath;
-    try {
-      final String? path = await _channel.invokeMethod('getPublicPicturesPath');
-      basePath = path ?? _derivedPublicPath(await getExternalStorageDirectory());
-    } on PlatformException {
-      basePath = _derivedPublicPath(await getExternalStorageDirectory());
-    }
-
+    final basePath = _derivedPublicPath(await getExternalStorageDirectory());
     final dir = Directory('$basePath/${AppConstants.savedDirName}');
     if (!await dir.exists()) await dir.create(recursive: true);
     return dir.path;

@@ -30,6 +30,8 @@ class DownloadNotifier extends ChangeNotifier {
   Future<void> shareStatus(StatusFile status) async {
     try {
       await _service.shareStatus(status);
+      _error = null;
+      notifyListeners();
     } catch (e) {
       _error = 'Share failed: $e';
       notifyListeners();

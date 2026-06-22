@@ -22,7 +22,7 @@ class StatusListScreen extends StatelessWidget {
         }
 
         return RefreshIndicator(
-          onRefresh: () async => notifier.refresh(),
+          onRefresh: () => notifier.refresh(),
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 4),
             itemCount: notifier.statuses.length,

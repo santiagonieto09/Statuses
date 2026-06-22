@@ -26,14 +26,14 @@ class ThemeNotifier extends ChangeNotifier {
     await prefs.setInt(_key, mode.index);
   }
 
-  void toggleTheme() {
+  Future<void> toggleTheme() async {
     switch (_themeMode) {
       case ThemeMode.system:
-        setThemeMode(ThemeMode.light);
+        await setThemeMode(ThemeMode.light);
       case ThemeMode.light:
-        setThemeMode(ThemeMode.dark);
+        await setThemeMode(ThemeMode.dark);
       case ThemeMode.dark:
-        setThemeMode(ThemeMode.system);
+        await setThemeMode(ThemeMode.system);
     }
   }
 }

@@ -9,7 +9,7 @@ class DateFormatter {
 
     if (difference == 0) return 'Today';
     if (difference == 1) return 'Yesterday';
-    if (difference <= 7) return '${difference} days ago';
+    if (difference <= 7) return '$difference days ago';
 
     final weekDifference = (difference / 7).floor();
     if (weekDifference <= 4) {

@@ -20,7 +20,9 @@ class _AppShellState extends State<AppShell> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<StatusNotifier>().loadStatuses();
+      context.read<StatusNotifier>().loadStatuses().catchError((Object error) {
+        debugPrint('Failed to load statuses: $error');
+      });
     });
   }
 

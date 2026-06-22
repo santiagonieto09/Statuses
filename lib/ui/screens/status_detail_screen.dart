@@ -240,18 +240,24 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
   Future<void> _handleMenuAction(String value, BuildContext context) async {
     switch (value) {
       case 'download':
-        final notifier = context.read<DownloadNotifier>();
-        await notifier.downloadStatus(widget.status);
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(notifier.error ?? 'Downloaded successfully'),
-            ),
-          );
+        {
+          final notifier = context.read<DownloadNotifier>();
+          await notifier.downloadStatus(widget.status);
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(notifier.error ?? 'Downloaded successfully'),
+              ),
+            );
+          }
+          break;
         }
       case 'share':
-        final notifier = context.read<DownloadNotifier>();
-        await notifier.shareStatus(widget.status);
+        {
+          final notifier = context.read<DownloadNotifier>();
+          await notifier.shareStatus(widget.status);
+          break;
+        }
       case 'info':
         if (context.mounted) {
           showDialog(

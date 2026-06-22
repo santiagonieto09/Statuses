@@ -22,7 +22,7 @@ class StatusGridScreen extends StatelessWidget {
         }
 
         return RefreshIndicator(
-          onRefresh: () async => notifier.refresh(),
+          onRefresh: () => notifier.refresh(),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final isLandscape = constraints.maxWidth > constraints.maxHeight;

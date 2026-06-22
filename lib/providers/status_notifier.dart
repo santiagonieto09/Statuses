@@ -32,10 +32,17 @@ class StatusNotifier extends ChangeNotifier {
 
     try {
       _statuses = await _repository.loadStatuses();
+      _subscription?.cancel();
+      _watcher.stop();
       _watcher.start();
       _subscription = _watcher.changes.listen((_) async {
-        _statuses = await _repository.loadStatuses();
-        notifyListeners();
+        try {
+          _statuses = await _repository.loadStatuses();
+          notifyListeners();
+        } catch (e) {
+          _errorMessage = 'Watcher error: $e';
+          notifyListeners();
+        }
       });
     } catch (e) {
       _errorMessage = 'Failed to load statuses: $e';
@@ -56,8 +63,13 @@ class StatusNotifier extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
-    _statuses = await _repository.loadStatuses();
-    notifyListeners();
+    try {
+      _statuses = await _repository.loadStatuses();
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Refresh failed: $e';
+      notifyListeners();
+    }
   }
 
   @override

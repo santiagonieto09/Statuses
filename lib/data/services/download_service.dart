@@ -7,7 +7,10 @@ import 'package:statuses/data/models/status_file.dart';
 class DownloadService {
   Future<String> getDownloadDirectory() async {
     final dir = await getExternalStorageDirectory();
-    final downloadDir = Directory('${dir?.path}/${AppConstants.savedDirName}');
+    if (dir == null) {
+      throw Exception('External storage not available');
+    }
+    final downloadDir = Directory('${dir.path}/${AppConstants.savedDirName}');
     if (!await downloadDir.exists()) {
       await downloadDir.create(recursive: true);
     }
@@ -25,7 +28,7 @@ class DownloadService {
       String newPath;
       do {
         final nameWithoutExt = status.fileNameWithoutExtension;
-        newPath = '$destDir/${nameWithoutExt}($counter)${status.extension}';
+        newPath = '$destDir/$nameWithoutExt($counter)${status.extension}';
         counter++;
       } while (await File(newPath).exists());
       await sourceFile.copy(newPath);

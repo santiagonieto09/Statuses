@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:statuses/constants/app_constants.dart';
+import 'package:statuses/data/models/status_file.dart';
 import 'package:statuses/providers/download_notifier.dart';
 import 'package:statuses/providers/status_notifier.dart';
 import 'package:statuses/ui/screens/status_detail_screen.dart';
@@ -61,9 +62,9 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
         ),
         title: const Text('Eliminar archivos'),
         content: Text(
-          'Se ${count == 1 ? 'eliminara' : 'eliminaran'} $count '
+          'Se ${count == 1 ? 'eliminará' : 'eliminarán'} $count '
           'archivo${count != 1 ? 's' : ''} permanentemente.\n'
-          'Esta accion no se puede deshacer.',
+          'Esta acción no se puede deshacer.',
         ),
         actions: [
           TextButton(
@@ -113,17 +114,31 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
           child: Consumer2<StatusNotifier, DownloadNotifier>(
             builder: (context, statusNotifier, downloadNotifier, _) {
               final isGrid = statusNotifier.viewMode == ViewMode.grid;
+              // Aplicar filtro de foto/video al igual que en la pestaña Statuses
+              final filterMode = statusNotifier.filterMode;
+              final filtered = filterMode == FilterMode.all
+                  ? downloadNotifier.savedStatuses
+                  : downloadNotifier.savedStatuses
+                      .where((s) => filterMode == FilterMode.photo
+                          ? s.mediaType == MediaType.image
+                          : s.mediaType == MediaType.video)
+                      .toList();
 
               if (downloadNotifier.isSavedLoading) {
                 return ShimmerLoading(isGrid: isGrid);
               }
 
-              if (!downloadNotifier.hasSaved) {
-                return const EmptyState(
-                  title: 'No saved statuses',
-                  subtitle:
-                      'Los estados que descargues aparecerán aquí.\nSe guardan en Pictures/Statuses.',
-                  icon: Icons.download_rounded,
+              if (filtered.isEmpty) {
+                return EmptyState(
+                  title: downloadNotifier.hasSaved
+                      ? 'Sin resultados'
+                      : 'No saved statuses',
+                  subtitle: downloadNotifier.hasSaved
+                      ? 'No hay archivos guardados de este tipo.'
+                      : 'Los estados que descargues aparecerán aquí.\nSe guardan en Pictures/Statuses.',
+                  icon: downloadNotifier.hasSaved
+                      ? Icons.filter_list_off_rounded
+                      : Icons.download_rounded,
                 );
               }
 
@@ -134,13 +149,14 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
                 child: CustomScrollView(
                   slivers: [
                     SliverToBoxAdapter(
-                      child: _buildHeader(context, downloadNotifier),
+                      child: _buildHeader(
+                          context, downloadNotifier, filtered.length),
                     ),
                     SliverPadding(
                       padding: const EdgeInsets.all(4),
                       sliver: isGrid
-                          ? _buildGrid(context, downloadNotifier)
-                          : _buildList(context, downloadNotifier),
+                          ? _buildGrid(context, filtered)
+                          : _buildList(context, filtered),
                     ),
                   ],
                 ),
@@ -197,12 +213,12 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
   // Construye el delegate compartido para grid y lista
   SliverChildBuilderDelegate _itemDelegate(
     BuildContext context,
-    DownloadNotifier notifier, {
+    List<StatusFile> statuses, {
     required bool isList,
   }) {
     return SliverChildBuilderDelegate(
       (context, index) {
-        final status = notifier.savedStatuses[index];
+        final status = statuses[index];
         final isSelected = _selectedPaths.contains(status.filePath);
 
         void onTap() {
@@ -212,7 +228,7 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => StatusDetailScreen(
-                  statuses: notifier.savedStatuses,
+                  statuses: statuses,
                   initialIndex: index,
                 ),
               ),
@@ -236,29 +252,29 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
                 onTap: onTap,
               );
       },
-      childCount: notifier.savedStatuses.length,
+      childCount: statuses.length,
     );
   }
 
-  Widget _buildGrid(BuildContext context, DownloadNotifier notifier) {
+  Widget _buildGrid(BuildContext context, List<StatusFile> statuses) {
     return SliverGrid(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: _crossAxisCount(context),
         crossAxisSpacing: 4,
         mainAxisSpacing: 4,
       ),
-      delegate: _itemDelegate(context, notifier, isList: false),
+      delegate: _itemDelegate(context, statuses, isList: false),
     );
   }
 
-  Widget _buildList(BuildContext context, DownloadNotifier notifier) {
+  Widget _buildList(BuildContext context, List<StatusFile> statuses) {
     return SliverList(
-      delegate: _itemDelegate(context, notifier, isList: true),
+      delegate: _itemDelegate(context, statuses, isList: true),
     );
   }
 
-  Widget _buildHeader(BuildContext context, DownloadNotifier notifier) {
-    final count = notifier.savedStatuses.length;
+  Widget _buildHeader(
+      BuildContext context, DownloadNotifier notifier, int count) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(

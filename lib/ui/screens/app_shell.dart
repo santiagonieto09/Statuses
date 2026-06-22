@@ -31,6 +31,42 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statuses'),
+        centerTitle: false,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Consumer<StatusNotifier>(
+            builder: (context, notifier, _) => Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+              child: Row(
+                children: [
+                  ChoiceChip(
+                    label: const Text('Todo'),
+                    avatar: const Icon(Icons.apps_rounded, size: 16),
+                    selected: notifier.filterMode == FilterMode.all,
+                    onSelected: (_) => notifier.setFilterMode(FilterMode.all),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Fotos'),
+                    avatar: const Icon(Icons.image_rounded, size: 16),
+                    selected: notifier.filterMode == FilterMode.photo,
+                    onSelected: (_) => notifier.setFilterMode(FilterMode.photo),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('Videos'),
+                    avatar: const Icon(Icons.videocam_rounded, size: 16),
+                    selected: notifier.filterMode == FilterMode.video,
+                    onSelected: (_) => notifier.setFilterMode(FilterMode.video),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
         actions: [
           Consumer<StatusNotifier>(
             builder: (context, notifier, _) => IconButton(

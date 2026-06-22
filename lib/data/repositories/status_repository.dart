@@ -59,13 +59,18 @@ class StatusRepository {
         final ext =
             name.contains('.') ? '.${name.split('.').last.toLowerCase()}' : '';
 
+        final mediaType = FileUtils.detectMediaType(ext);
+        // Solo procesar imagenes y videos
+        if (mediaType != MediaType.image && mediaType != MediaType.video)
+          continue;
+
         files.add(StatusFile(
           filePath: file.path,
           fileName: name,
           extension: ext,
           fileSize: await file.length(),
           lastModified: await file.lastModified(),
-          mediaType: FileUtils.detectMediaType(ext),
+          mediaType: mediaType,
         ));
       }
     }

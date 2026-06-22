@@ -104,7 +104,6 @@ class StatusThumbnailCard extends StatelessWidget {
             return _buildPlaceholder(context);
           },
         );
-      case MediaType.audio:
       case MediaType.unknown:
         return _buildPlaceholder(context);
       case MediaType.image:
@@ -123,9 +122,7 @@ class StatusThumbnailCard extends StatelessWidget {
       child: Icon(
         status.mediaType == MediaType.video
             ? Icons.videocam_rounded
-            : status.mediaType == MediaType.audio
-                ? Icons.audiotrack_rounded
-                : Icons.image_rounded,
+            : Icons.image_rounded,
         color: AppColors.secondaryText,
         size: 32,
       ),
@@ -133,26 +130,21 @@ class StatusThumbnailCard extends StatelessWidget {
   }
 
   Widget _buildBadge(BuildContext context) {
+    // Solo se muestra para videos
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: Colors.black54,
         borderRadius: BorderRadius.circular(4),
       ),
-      child: Row(
+      child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            status.mediaType == MediaType.video
-                ? Icons.play_arrow_rounded
-                : Icons.music_note_rounded,
-            color: Colors.white,
-            size: 14,
-          ),
-          const SizedBox(width: 2),
+          Icon(Icons.play_arrow_rounded, color: Colors.white, size: 14),
+          SizedBox(width: 2),
           Text(
-            status.mediaType == MediaType.video ? 'VIDEO' : 'AUDIO',
-            style: const TextStyle(
+            'VIDEO',
+            style: TextStyle(
               color: Colors.white,
               fontSize: 9,
               fontWeight: FontWeight.w600,
@@ -242,9 +234,7 @@ class StatusListItem extends StatelessWidget {
       child: Icon(
         status.mediaType == MediaType.video
             ? Icons.videocam_rounded
-            : status.mediaType == MediaType.audio
-                ? Icons.audiotrack_rounded
-                : Icons.image_rounded,
+            : Icons.image_rounded,
         color: AppColors.secondaryText,
       ),
     );
@@ -279,7 +269,6 @@ class StatusListItem extends StatelessWidget {
             return errorWidget;
           },
         );
-      case MediaType.audio:
       case MediaType.unknown:
         return errorWidget;
       case MediaType.image:
@@ -292,15 +281,10 @@ class StatusListItem extends StatelessWidget {
   }
 
   Widget? _buildTrailingIcon(BuildContext context) {
-    switch (status.mediaType) {
-      case MediaType.video:
-        return const Icon(Icons.play_circle_outline,
-            color: AppColors.primaryDark);
-      case MediaType.audio:
-        return const Icon(Icons.music_note_outlined,
-            color: AppColors.primaryDark);
-      default:
-        return null;
+    if (status.mediaType == MediaType.video) {
+      return const Icon(Icons.play_circle_outline,
+          color: AppColors.primaryDark);
     }
+    return null;
   }
 }

@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:statuses/data/models/status_file.dart';
+import 'package:statuses/utils/file_utils.dart';
 import 'package:statuses/data/repositories/status_repository.dart';
 import 'package:statuses/data/services/file_watcher_service.dart';
 
 enum ViewMode { grid, list }
+
+enum FilterMode { all, photo, video }
 
 class StatusNotifier extends ChangeNotifier {
   final StatusRepository _repository;
@@ -13,12 +16,27 @@ class StatusNotifier extends ChangeNotifier {
 
   List<StatusFile> _statuses = [];
   ViewMode _viewMode = ViewMode.grid;
+  FilterMode _filterMode = FilterMode.all;
   bool _isLoading = false;
   String? _errorMessage;
   bool _needsSafFallback = false;
 
   List<StatusFile> get statuses => _statuses;
   ViewMode get viewMode => _viewMode;
+  FilterMode get filterMode => _filterMode;
+
+  /// Statuses filtrados según el filtro activo (all/photo/video).
+  List<StatusFile> get filteredStatuses {
+    switch (_filterMode) {
+      case FilterMode.all:
+        return _statuses;
+      case FilterMode.photo:
+        return _statuses.where((s) => s.mediaType == MediaType.image).toList();
+      case FilterMode.video:
+        return _statuses.where((s) => s.mediaType == MediaType.video).toList();
+    }
+  }
+
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
@@ -37,7 +55,8 @@ class StatusNotifier extends ChangeNotifier {
 
     try {
       _statuses = await _repository.loadStatuses();
-      _needsSafFallback = _statuses.isEmpty && await _repository.needsSafFallback();
+      _needsSafFallback =
+          _statuses.isEmpty && await _repository.needsSafFallback();
 
       _subscription?.cancel();
       _watcher.stop();
@@ -83,10 +102,16 @@ class StatusNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setFilterMode(FilterMode mode) {
+    _filterMode = mode;
+    notifyListeners();
+  }
+
   Future<void> refresh() async {
     try {
       _statuses = await _repository.loadStatuses();
-      _needsSafFallback = _statuses.isEmpty && await _repository.needsSafFallback();
+      _needsSafFallback =
+          _statuses.isEmpty && await _repository.needsSafFallback();
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Refresh failed: $e';

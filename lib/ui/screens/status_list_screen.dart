@@ -18,7 +18,8 @@ class StatusListScreen extends StatelessWidget {
           return const ShimmerLoading(isGrid: false);
         }
 
-        if (notifier.statuses.isEmpty) {
+        final statuses = notifier.filteredStatuses;
+        if (statuses.isEmpty) {
           return EmptyState(
             onGrantSaf: needsSafFallback
                 ? () => context.read<StatusNotifier>().grantSafPermission()
@@ -30,15 +31,15 @@ class StatusListScreen extends StatelessWidget {
           onRefresh: () => notifier.refresh(),
           child: ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 4),
-            itemCount: notifier.statuses.length,
+            itemCount: statuses.length,
             itemBuilder: (context, index) {
-              final status = notifier.statuses[index];
+              final status = statuses[index];
               return StatusListItem(
                 status: status,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => StatusDetailScreen(
-                      statuses: notifier.statuses,
+                      statuses: statuses,
                       initialIndex: index,
                     ),
                   ),

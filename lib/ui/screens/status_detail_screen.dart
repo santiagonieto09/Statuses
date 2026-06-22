@@ -204,32 +204,6 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
             ),
           ),
         );
-      case MediaType.audio:
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryDark.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.audiotrack_rounded,
-                  size: 50,
-                  color: AppColors.primaryDark,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                status.fileNameWithoutExtension,
-                style: const TextStyle(color: Colors.white70),
-              ),
-            ],
-          ),
-        );
       default:
         return const Center(
           child: Text('Unsupported file type',

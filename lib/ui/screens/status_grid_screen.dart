@@ -26,6 +26,7 @@ class StatusGridScreen extends StatelessWidget {
           );
         }
 
+        final statuses = notifier.filteredStatuses;
         return RefreshIndicator(
           onRefresh: () => notifier.refresh(),
           child: LayoutBuilder(
@@ -38,15 +39,15 @@ class StatusGridScreen extends StatelessWidget {
                   crossAxisSpacing: 4,
                   mainAxisSpacing: 4,
                 ),
-                itemCount: notifier.statuses.length,
+                itemCount: statuses.length,
                 itemBuilder: (context, index) {
-                  final status = notifier.statuses[index];
+                  final status = statuses[index];
                   return StatusThumbnailCard(
                     status: status,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => StatusDetailScreen(
-                          statuses: notifier.statuses,
+                          statuses: statuses,
                           initialIndex: index,
                         ),
                       ),

@@ -297,12 +297,27 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
           await notifier.downloadStatus(_current);
           if (context.mounted) {
             final success = notifier.error == null;
-            final msg = success
-                ? '\u2713 Guardado en Pictures/Statuses'
-                : notifier.error!;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(msg),
+                content: Row(
+                  children: [
+                    Icon(
+                      success
+                          ? Icons.check_circle_rounded
+                          : Icons.error_rounded,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        success
+                            ? 'Archivo guardado correctamente'
+                            : notifier.error!,
+                      ),
+                    ),
+                  ],
+                ),
                 backgroundColor: success ? Colors.green[700] : Colors.red[700],
                 behavior: SnackBarBehavior.floating,
                 duration: const Duration(seconds: 3),

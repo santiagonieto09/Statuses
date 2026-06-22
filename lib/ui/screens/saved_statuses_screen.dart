@@ -92,13 +92,24 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
           Icon(Icons.folder_rounded,
               size: 16, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              'Pictures/${AppConstants.savedDirName}  ·  $count archivo${count != 1 ? 's' : ''}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
+          Text(
+            'Pictures/${AppConstants.savedDirName}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+          ),
+          const SizedBox(width: 6),
+          Icon(
+            Icons.circle,
+            size: 4,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 6),
+          Text(
+            '$count archivo${count != 1 ? 's' : ''}',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
         ],
       ),

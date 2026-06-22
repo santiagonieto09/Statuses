@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:statuses/data/models/status_file.dart';
 import 'package:statuses/providers/download_notifier.dart';
-import 'package:statuses/ui/theme/app_theme.dart';
 import 'package:statuses/utils/date_formatter.dart';
 import 'package:statuses/utils/file_utils.dart';
 

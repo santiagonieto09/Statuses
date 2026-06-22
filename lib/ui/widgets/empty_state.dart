@@ -5,12 +5,15 @@ class EmptyState extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+  /// Cuando se proporciona, se muestra un botón SAF para seleccionar la carpeta
+  final VoidCallback? onGrantSaf;
 
   const EmptyState({
     super.key,
     this.title = 'No statuses found',
     this.subtitle = 'Open WhatsApp, view some statuses, then come back here.',
     this.icon = Icons.hourglass_empty_rounded,
+    this.onGrantSaf,
   });
 
   @override
@@ -46,9 +49,34 @@ class EmptyState extends StatelessWidget {
                   ),
               textAlign: TextAlign.center,
             ),
+            if (onGrantSaf != null) ..._buildSafSection(context),
           ],
         ),
       ),
     );
+  }
+
+  List<Widget> _buildSafSection(BuildContext context) {
+    return [
+      const SizedBox(height: 28),
+      const Divider(),
+      const SizedBox(height: 16),
+      Text(
+        'Si el problema persiste, concede acceso manual a la carpeta:',
+        textAlign: TextAlign.center,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppColors.secondaryText,
+            ),
+      ),
+      const SizedBox(height: 12),
+      FilledButton.icon(
+        onPressed: onGrantSaf,
+        icon: const Icon(Icons.folder_open_rounded),
+        label: const Text('Seleccionar carpeta .Statuses'),
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primaryDark,
+        ),
+      ),
+    ];
   }
 }

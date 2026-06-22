@@ -36,3 +36,8 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // DocumentFile API para acceso SAF a directorios de otras apps
+    implementation "androidx.documentfile:documentfile:1.0.1"
+}

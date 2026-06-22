@@ -91,8 +91,8 @@ class _StatusView extends StatelessWidget {
     return Consumer<StatusNotifier>(
       builder: (context, notifier, _) {
         return notifier.viewMode == ViewMode.grid
-            ? const StatusGridScreen()
-            : const StatusListScreen();
+            ? StatusGridScreen(needsSafFallback: notifier.needsSafFallback)
+            : StatusListScreen(needsSafFallback: notifier.needsSafFallback);
       },
     );
   }

@@ -7,7 +7,8 @@ import 'package:statuses/ui/widgets/shimmer_loading.dart';
 import 'package:statuses/ui/widgets/status_thumbnail_card.dart';
 
 class StatusListScreen extends StatelessWidget {
-  const StatusListScreen({super.key});
+  final bool needsSafFallback;
+  const StatusListScreen({super.key, this.needsSafFallback = false});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,11 @@ class StatusListScreen extends StatelessWidget {
         }
 
         if (notifier.statuses.isEmpty) {
-          return const EmptyState();
+          return EmptyState(
+            onGrantSaf: needsSafFallback
+                ? () => context.read<StatusNotifier>().grantSafPermission()
+                : null,
+          );
         }
 
         return RefreshIndicator(

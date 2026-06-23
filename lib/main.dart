@@ -23,21 +23,28 @@ void main() async {
 
   LocaleSettings.setLocaleSync(initialLocale);
 
-  runApp(
-    TranslationProvider(
-      child: MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => ThemeNotifier()),
-          ChangeNotifierProvider(
-            create: (_) => LocaleNotifier(initialLocale: initialLocale),
+  runZonedGuarded(
+    () {
+      runApp(
+        TranslationProvider(
+          child: MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) => ThemeNotifier()),
+              ChangeNotifierProvider(
+                create: (_) => LocaleNotifier(initialLocale: initialLocale),
+              ),
+              ChangeNotifierProvider(
+                create: (_) => StatusNotifier(StatusRepository()),
+              ),
+              ChangeNotifierProvider(create: (_) => DownloadNotifier()),
+            ],
+            child: const StatusesApp(),
           ),
-          ChangeNotifierProvider(
-            create: (_) => StatusNotifier(StatusRepository()),
-          ),
-          ChangeNotifierProvider(create: (_) => DownloadNotifier()),
-        ],
-        child: const StatusesApp(),
-      ),
-    ),
+        ),
+      );
+    },
+    (error, stack) {
+      debugPrint('Error no capturado: $error\n$stack');
+    },
   );
 }

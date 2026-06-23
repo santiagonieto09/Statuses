@@ -35,22 +35,49 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isGrid) {
-      return GridView.builder(
-        padding: const EdgeInsets.all(8),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 4,
-          mainAxisSpacing: 4,
-        ),
-        itemCount: 12,
-        itemBuilder: (_, __) => _buildShimmerCard(),
-      );
-    }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (widget.isGrid) {
+          return _buildGrid(constraints);
+        }
+        return _buildList(constraints);
+      },
+    );
+  }
+
+  Widget _buildGrid(BoxConstraints constraints) {
+    const double padding = 8;
+    const double spacing = 4;
+    const int crossAxisCount = 3;
+    final double availableWidth = constraints.maxWidth - padding * 2;
+    final double cardSize = (availableWidth - spacing * (crossAxisCount - 1)) / crossAxisCount;
+    final double rowHeight = cardSize + spacing;
+    final double availableHeight = constraints.maxHeight - padding * 2;
+    final int rows = (availableHeight / rowHeight).ceil().clamp(4, 12);
+    final int itemCount = rows * crossAxisCount;
+
+    return GridView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(padding),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: spacing,
+        mainAxisSpacing: spacing,
+        childAspectRatio: 1,
+      ),
+      itemCount: itemCount,
+      itemBuilder: (_, __) => _buildShimmerCard(),
+    );
+  }
+
+  Widget _buildList(BoxConstraints constraints) {
+    const double itemHeight = 72;
+    final int itemCount = (constraints.maxHeight / itemHeight).ceil().clamp(6, 20);
 
     return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(8),
-      itemCount: 10,
+      itemCount: itemCount,
       itemBuilder: (_, __) => _buildShimmerListItem(),
     );
   }

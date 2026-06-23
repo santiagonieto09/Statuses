@@ -3,9 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:statuses/i18n/translations.g.dart';
 
 class LocaleNotifier extends ChangeNotifier {
-  static const String _key = 'locale';
+  static const String key = 'locale';
 
-  AppLocale _locale = AppLocale.en;
+  AppLocale _locale;
   bool _initialized = false;
 
   AppLocale get locale => _locale;
@@ -13,7 +13,7 @@ class LocaleNotifier extends ChangeNotifier {
 
   Locale get flutterLocale => _locale.flutterLocale;
 
-  LocaleNotifier() {
+  LocaleNotifier({AppLocale? initialLocale}) : _locale = initialLocale ?? AppLocale.es {
     _init();
   }
 
@@ -21,7 +21,7 @@ class LocaleNotifier extends ChangeNotifier {
     try {
       await _loadLocale();
     } catch (_) {
-      _locale = AppLocale.en;
+      _locale = AppLocale.es;
     }
     _initialized = true;
     notifyListeners();
@@ -29,11 +29,11 @@ class LocaleNotifier extends ChangeNotifier {
 
   Future<void> _loadLocale() async {
     final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString(_key);
+    final saved = prefs.getString(key);
     if (saved != null) {
       _locale = AppLocale.values.firstWhere(
         (l) => l.languageTag == saved,
-        orElse: () => AppLocale.en,
+        orElse: () => AppLocale.es,
       );
     }
   }
@@ -43,7 +43,7 @@ class LocaleNotifier extends ChangeNotifier {
     await LocaleSettings.setLocale(locale);
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_key, locale.languageTag);
+      await prefs.setString(key, locale.languageTag);
     } catch (_) {
       // Persistence failed but locale already applied
     }

@@ -26,6 +26,7 @@ class DownloadNotifier extends ChangeNotifier {
   bool _autoSaveEnabled = false;
   bool _autoSaveWarningDismissed = false;
   bool _isDeleting = false;
+  bool _isSyncing = false;
   String _autoSaveStorageInfo = '';
   Timer? _autoSaveTimer;
   StatusNotifier? _statusNotifier;
@@ -42,6 +43,7 @@ class DownloadNotifier extends ChangeNotifier {
   bool get hasSaved => _savedStatuses.isNotEmpty;
   Set<String> get savedFilePaths => _cachedSavedFilePaths;
   bool get isDeleting => _isDeleting;
+  bool get isSyncing => _isSyncing;
 
   bool get autoSaveEnabled => _autoSaveEnabled;
   bool get autoSaveWarningDismissed => _autoSaveWarningDismissed;
@@ -79,26 +81,34 @@ class DownloadNotifier extends ChangeNotifier {
   }
 
   Future<void> toggleAutoSave(bool enabled) async {
+    if (_isSyncing) return;
     _autoSaveEnabled = enabled;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_autoSavePrefsKey, enabled);
     if (enabled) {
+      _isSyncing = true;
+      notifyListeners();
       _processedSourcePaths.clear();
       await _syncOnAutoSaveEnable();
       _startAutoSaveTimer();
+      _isSyncing = false;
+      await _loadSaved();
+      await _updateStorageInfo();
+      notifyListeners();
     } else {
       _stopAutoSaveTimer();
+      await _loadSaved();
+      await _updateStorageInfo();
+      notifyListeners();
     }
-    await _loadSaved();
-    await _updateStorageInfo();
-    notifyListeners();
   }
 
   Future<void> _syncOnAutoSaveEnable() async {
     if (_statusNotifier == null) return;
     final statuses = _statusNotifier!.filteredStatuses;
     await _loadSaved();
-    for (final status in statuses) {
+    for (int i = 0; i < statuses.length; i++) {
+      final status = statuses[i];
       if (_processingPaths.contains(status.filePath)) continue;
       if (_processedSourcePaths.contains(status.filePath)) continue;
       if (_cachedSavedFilePaths.contains(status.fileName)) continue;
@@ -114,6 +124,7 @@ class DownloadNotifier extends ChangeNotifier {
       } finally {
         _processingPaths.remove(status.filePath);
       }
+      if (i % 5 == 0) await Future.delayed(Duration.zero);
     }
   }
 
@@ -146,7 +157,7 @@ class DownloadNotifier extends ChangeNotifier {
   }
 
   Future<void> _checkAutoSave() async {
-    if (!_autoSaveEnabled || _statusNotifier == null) return;
+    if (!_autoSaveEnabled || _statusNotifier == null || _isSyncing) return;
     await _loadSaved();
     for (final status in _statusNotifier!.filteredStatuses) {
       if (_processingPaths.contains(status.filePath)) continue;
@@ -182,7 +193,7 @@ class DownloadNotifier extends ChangeNotifier {
   }
 
   Future<void> autoSaveStatus(StatusFile status) async {
-    if (!_autoSaveEnabled) return;
+    if (!_autoSaveEnabled || _isSyncing) return;
     if (_processingPaths.contains(status.filePath)) return;
     if (_processedSourcePaths.contains(status.filePath)) return;
     if (_cachedSavedFilePaths.contains(status.fileName)) return;

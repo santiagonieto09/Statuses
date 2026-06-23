@@ -170,26 +170,49 @@ class _AutoSaveTileState extends State<_AutoSaveTile> {
   Future<bool?> _showWarningDialog(BuildContext context) async {
     final t = Translations.of(context);
     final notifier = context.read<DownloadNotifier>();
+    final colorScheme = Theme.of(context).colorScheme;
     bool dontShowAgain = false;
     return showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(t.settings.auto_save_warning_title),
+          title: Text(
+            t.settings.auto_save_warning_title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(t.settings.auto_save_warning_message),
-              const SizedBox(height: 16),
+              Text(
+                t.settings.auto_save_warning_message,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              const SizedBox(height: 20),
               Row(
                 children: [
-                  Checkbox(
-                    value: dontShowAgain,
-                    onChanged: (v) =>
-                        setDialogState(() => dontShowAgain = v ?? false),
+                  SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: Checkbox(
+                      value: dontShowAgain,
+                      onChanged: (v) =>
+                          setDialogState(() => dontShowAgain = v ?? false),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
                   ),
-                  Text(t.settings.auto_save_warning_dont_show_again),
+                  const SizedBox(width: 12),
+                  Text(
+                    t.settings.auto_save_warning_dont_show_again,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                        ),
+                  ),
                 ],
               ),
             ],
@@ -197,7 +220,10 @@ class _AutoSaveTileState extends State<_AutoSaveTile> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text(t.saved.cancel),
+              child: Text(
+                t.saved.cancel,
+                style: TextStyle(color: colorScheme.primary),
+              ),
             ),
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(true),
@@ -219,17 +245,30 @@ class _AutoSaveTileState extends State<_AutoSaveTile> {
     final t = Translations.of(context);
     final notifier = context.watch<DownloadNotifier>();
     return SwitchListTile(
-      secondary: Icon(
-        notifier.autoSaveEnabled ? Icons.save_alt_rounded : Icons.save_outlined,
-      ),
+      secondary: notifier.isSyncing
+          ? SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            )
+          : Icon(
+              notifier.autoSaveEnabled
+                  ? Icons.save_alt_rounded
+                  : Icons.save_outlined,
+            ),
       title: Text(t.settings.auto_save),
       subtitle: Text(
-        notifier.autoSaveEnabled
-            ? '${t.settings.auto_save_active} · ${notifier.autoSaveStorageInfo}'
-            : t.settings.auto_save_inactive,
+        notifier.isSyncing
+            ? t.settings.auto_save_syncing
+            : notifier.autoSaveEnabled
+                ? '${t.settings.auto_save_active} · ${notifier.autoSaveStorageInfo}'
+                : t.settings.auto_save_inactive,
       ),
       value: notifier.autoSaveEnabled,
-      onChanged: (v) => _onToggle(v, context),
+      onChanged: notifier.isSyncing ? null : (v) => _onToggle(v, context),
     );
   }
 }

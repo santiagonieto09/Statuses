@@ -52,6 +52,51 @@ class DownloadService {
     return destPath;
   }
 
+  String downloadStatusSync(StatusFile status) {
+    final basePath = '/storage/emulated/0/Pictures';
+    final destDir = '$basePath/${AppConstants.savedDirName}';
+    final dir = Directory(destDir);
+    if (!dir.existsSync()) dir.createSync(recursive: true);
+    final sourceFile = File(status.filePath);
+    final destPath = '$destDir/${status.fileName}';
+
+    final destFile = File(destPath);
+    if (!destFile.existsSync()) {
+      sourceFile.copySync(destPath);
+    }
+    return destPath;
+  }
+
+  List<StatusFile> getSavedStatusesSync() {
+    const basePath = '/storage/emulated/0/Pictures';
+    final destDir = '$basePath/${AppConstants.savedDirName}';
+    final dir = Directory(destDir);
+    if (!dir.existsSync()) return [];
+
+    final files = <StatusFile>[];
+    for (final entity in dir.listSync()) {
+      if (entity is! File) continue;
+      final file = entity;
+      final name = file.uri.pathSegments.last;
+      final ext =
+          name.contains('.') ? '.${name.split('.').last.toLowerCase()}' : '';
+      final mediaType = FileUtils.detectMediaType(ext);
+      if (mediaType == MediaType.unknown) continue;
+
+      files.add(StatusFile(
+        filePath: file.path,
+        fileName: name,
+        extension: ext,
+        fileSize: file.lengthSync(),
+        lastModified: file.lastModifiedSync(),
+        mediaType: mediaType,
+      ));
+    }
+
+    files.sort((a, b) => b.lastModified.compareTo(a.lastModified));
+    return files;
+  }
+
   Future<String> _getOrComputeHash(String filePath) async {
     if (_hashCache.containsKey(filePath)) return _hashCache[filePath]!;
     final hash = await FileUtils.computeFileHash(filePath);

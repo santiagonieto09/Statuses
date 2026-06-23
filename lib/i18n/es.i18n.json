@@ -27,8 +27,6 @@
     "unsupported_file_type": "Tipo de archivo no soportado",
     "saved_successfully": "Archivo guardado correctamente",
     "video_badge": "VIDEO",
-    "repost": "Volver a publicar",
-    "repost_whatsapp": "Publicar en WhatsApp",
     "saved_badge": "Guardado",
     "new_status_single": "1 nuevo estado disponible",
     "new_status_plural": "$count nuevos estados disponibles"
@@ -101,7 +99,8 @@
     "enable": "Activar",
     "auto_save_warning_title": "Activar guardado autom\u00e1tico",
     "auto_save_warning_message": "Al activar esta opci\u00f3n, todos los estados visibles actualmente se guardar\u00e1n autom\u00e1ticamente en tu dispositivo. La app monitorear\u00e1 continuamente y guardar\u00e1 nuevos estados.",
-    "auto_save_warning_dont_show_again": "No mostrar de nuevo"
+    "auto_save_warning_dont_show_again": "No mostrar de nuevo",
+    "auto_save_syncing": "Sincronizando estados..."
   },
   "help": {
     "title": "Centro de ayuda",
@@ -124,8 +123,6 @@
     "auto_save_body": "Al activarlo, la app guarda autom\u00e1ticamente todos los estados visibles en tu dispositivo. Funciona en segundo plano y evita duplicados. Puedes ver el uso de almacenamiento en Configuraci\u00f3n.",
     "saved_indicator_title": "Indicadores de estados guardados",
     "saved_indicator_body": "Los estados ya guardados muestran un icono de check verde. En la vista de detalle, el bot\u00f3n de descarga cambia a \"Guardado\" y se desactiva para evitar duplicados.",
-    "share_vs_repost_title": "Compartir vs Volver a publicar",
-    "share_vs_repost_body": "Usa \"Compartir\" para enviar un estado a cualquier app. Usa \"Volver a publicar\" para enviarlo directamente a WhatsApp \u2014 la app intenta abrir el compositor de estados de WhatsApp primero, luego cae a chat de WhatsApp.",
     "sync_title": "Sincronizaci\u00f3n autom\u00e1tica",
     "sync_body": "La app detecta autom\u00e1ticamente nuevos estados en las carpetas de WhatsApp. El vigilador de archivos verifica cambios cada 30 segundos. Esto funciona incluso con la app en segundo plano.",
     "storage_title": "Gesti\u00f3n de almacenamiento",

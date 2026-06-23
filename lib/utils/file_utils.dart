@@ -68,8 +68,25 @@ class FileUtils {
     return sha256.convert(bytes).toString();
   }
 
+  static String computeFileHashSync(String filePath) {
+    final file = File(filePath);
+    final length = file.lengthSync();
+    if (length > 10 * 1024 * 1024) {
+      return _computePartialHashSync(file, length);
+    }
+    final bytes = file.readAsBytesSync();
+    return sha256.convert(bytes).toString();
+  }
+
   static Future<String> _computePartialHash(File file, int length) async {
     final bytes = await file.readAsBytes();
+    final chunk = bytes.take(_partialHashSize).toList();
+    final hash = sha256.convert(chunk).toString();
+    return '$hash|$length';
+  }
+
+  static String _computePartialHashSync(File file, int length) {
+    final bytes = file.readAsBytesSync();
     final chunk = bytes.take(_partialHashSize).toList();
     final hash = sha256.convert(chunk).toString();
     return '$hash|$length';

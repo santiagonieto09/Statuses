@@ -14,23 +14,25 @@ class StatusThumbnailCard extends StatelessWidget {
   final StatusFile status;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
-  final VoidCallback? onRepost;
   final bool isSelected;
+  final bool showSavedIndicator;
 
   const StatusThumbnailCard({
     super.key,
     required this.status,
     this.onTap,
     this.onLongPress,
-    this.onRepost,
     this.isSelected = false,
+    this.showSavedIndicator = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isSaved = context.select<DownloadNotifier, bool>(
-      (n) => n.savedFilePaths.contains(status.fileName),
-    );
+    final isSaved = showSavedIndicator
+        ? context.select<DownloadNotifier, bool>(
+            (n) => n.savedFilePaths.contains(status.fileName),
+          )
+        : false;
     return RepaintBoundary(
       child: GestureDetector(
         onTap: onTap,
@@ -195,24 +197,25 @@ class StatusListItem extends StatelessWidget {
   final StatusFile status;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
-  final VoidCallback? onRepost;
   final bool isSelected;
+  final bool showSavedIndicator;
 
   const StatusListItem({
     super.key,
     required this.status,
     this.onTap,
     this.onLongPress,
-    this.onRepost,
     this.isSelected = false,
+    this.showSavedIndicator = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final t = Translations.of(context);
-    final isSaved = context.select<DownloadNotifier, bool>(
-      (n) => n.savedFilePaths.contains(status.fileName),
-    );
+    final isSaved = showSavedIndicator
+        ? context.select<DownloadNotifier, bool>(
+            (n) => n.savedFilePaths.contains(status.fileName),
+          )
+        : false;
     return ListTile(
       tileColor: isSelected ? Colors.green.withValues(alpha: 0.15) : null,
       onTap: onTap,
@@ -281,22 +284,7 @@ class StatusListItem extends StatelessWidget {
           ),
         ],
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (isSaved)
-            Icon(Icons.check_circle_rounded,
-                color: AppColors.accentGreen, size: 18),
-          if (onRepost != null)
-            IconButton(
-              icon: Icon(Icons.repeat_rounded,
-                  color: Theme.of(context).colorScheme.primary, size: 20),
-              tooltip: t.detail.repost,
-              onPressed: onRepost,
-            ),
-          if (_buildTrailingIcon(context) != null) _buildTrailingIcon(context)!,
-        ],
-      ),
+      trailing: _buildTrailingIcon(context),
     );
   }
 

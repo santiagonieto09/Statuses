@@ -106,6 +106,7 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
               ? _buildSelectionBar(context)
               : const SizedBox.shrink(),
         ),
+
         Expanded(
           child: Consumer2<StatusNotifier, DownloadNotifier>(
             builder: (context, statusNotifier, downloadNotifier, _) {
@@ -260,12 +261,14 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
             ? StatusListItem(
                 status: status,
                 isSelected: isSelected,
+                showSavedIndicator: false,
                 onLongPress: onLongPress,
                 onTap: onTap,
               )
             : StatusThumbnailCard(
                 status: status,
                 isSelected: isSelected,
+                showSavedIndicator: false,
                 onLongPress: onLongPress,
                 onTap: onTap,
               );

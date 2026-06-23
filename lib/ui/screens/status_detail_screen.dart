@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:statuses/data/models/status_file.dart';
 import 'package:statuses/i18n/translations.g.dart';
-import 'package:statuses/data/services/share_service.dart';
 import 'package:statuses/providers/download_notifier.dart';
 import 'package:statuses/ui/theme/app_theme.dart';
 import 'package:statuses/utils/date_formatter.dart';
@@ -71,13 +70,6 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
     }
   }
 
-  bool _isSaved(BuildContext context) {
-    final savedPaths = context.select<DownloadNotifier, Set<String>>(
-      (n) => n.savedFilePaths,
-    );
-    return savedPaths.contains(_current.fileName);
-  }
-
   void _onPageChanged(int index) {
     _videoController?.pause();
     final old = _videoController;
@@ -109,22 +101,10 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Flexible(
-                  child: Text(
-                    _current.fileNameWithoutExtension,
-                    style: const TextStyle(fontSize: 14),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (_isSaved(context))
-                  const Padding(
-                    padding: EdgeInsets.only(left: 6),
-                    child: Icon(Icons.check_circle_rounded,
-                        color: AppColors.accentGreen, size: 16),
-                  ),
-              ],
+            Text(
+              _current.fileNameWithoutExtension,
+              style: const TextStyle(fontSize: 14),
+              overflow: TextOverflow.ellipsis,
             ),
             if (showSubtitle)
               Text(
@@ -139,7 +119,6 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
             onSelected: (value) => _handleMenuAction(value, context),
             itemBuilder: (_) => [
               PopupMenuItem(value: 'download', child: Text(t.detail.download)),
-              PopupMenuItem(value: 'repost', child: Text(t.detail.repost)),
               PopupMenuItem(value: 'share', child: Text(t.detail.share)),
               PopupMenuItem(value: 'info', child: Text(t.detail.info)),
             ],
@@ -251,7 +230,9 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
 
   Widget _buildBottomBar(BuildContext context) {
     final t = Translations.of(context);
-    final saved = _isSaved(context);
+    final saved = context.select<DownloadNotifier, bool>(
+      (n) => n.savedFilePaths.contains(_current.fileName),
+    );
     return Container(
       color: Colors.black87,
       padding: EdgeInsets.only(
@@ -270,11 +251,6 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
             label: saved ? t.detail.saved_badge : t.detail.download,
             color: saved ? AppColors.accentGreen : Colors.white54,
             onTap: saved ? null : () => _handleMenuAction('download', context),
-          ),
-          _buildActionButton(
-            icon: Icons.repeat_rounded,
-            label: t.detail.repost,
-            onTap: () => _handleMenuAction('repost', context),
           ),
           _buildActionButton(
             icon: Icons.share_rounded,
@@ -317,8 +293,6 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
     switch (value) {
       case 'download':
         return _handleDownload(context);
-      case 'repost':
-        return _handleRepost(context);
       case 'share':
         return _handleShare(context);
       case 'info':
@@ -377,44 +351,6 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
           duration: const Duration(seconds: 3),
         ),
       );
-    }
-  }
-
-  Future<void> _handleRepost(BuildContext context) async {
-    final t = Translations.of(context);
-    try {
-      await context.read<ShareService>().repostToWhatsApp(_current);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
-                const SizedBox(width: 8),
-                Expanded(child: Text(t.detail.repost_whatsapp)),
-              ],
-            ),
-            backgroundColor: Colors.green[700],
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error_rounded, color: Colors.white, size: 18),
-                const SizedBox(width: 8),
-                Expanded(child: Text('$e')),
-              ],
-            ),
-            backgroundColor: Colors.red[700],
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
     }
   }
 

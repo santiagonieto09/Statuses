@@ -27,8 +27,6 @@
     "unsupported_file_type": "Unsupported file type",
     "saved_successfully": "File saved successfully",
     "video_badge": "VIDEO",
-    "repost": "Repost",
-    "repost_whatsapp": "Post to WhatsApp",
     "saved_badge": "Saved",
     "new_status_single": "1 new status available",
     "new_status_plural": "$count new statuses available"
@@ -101,7 +99,8 @@
     "enable": "Enable",
     "auto_save_warning_title": "Enable auto-save",
     "auto_save_warning_message": "When enabled, all currently visible statuses will be automatically saved to your device. The app will continuously monitor and save new statuses.",
-    "auto_save_warning_dont_show_again": "Don't show again"
+    "auto_save_warning_dont_show_again": "Don't show again",
+    "auto_save_syncing": "Syncing statuses..."
   },
   "help": {
     "title": "Help Center",
@@ -124,8 +123,6 @@
     "auto_save_body": "When enabled, the app automatically saves all visible statuses to your device. It works in the background and avoids duplicates. You can see storage usage in Settings.",
     "saved_indicator_title": "Saved Status Indicators",
     "saved_indicator_body": "Statuses that have already been saved show a green checkmark icon. In the detail view, the download button changes to \"Saved\" and is disabled to prevent duplicates.",
-    "share_vs_repost_title": "Share vs Repost",
-    "share_vs_repost_body": "Use \"Share\" to send a status to any app. Use \"Repost\" to send it directly to WhatsApp — the app tries to open WhatsApp's status composer first, then falls back to WhatsApp chat.",
     "sync_title": "Automatic Synchronization",
     "sync_body": "The app automatically detects new statuses in WhatsApp folders. The file watcher checks for changes every 30 seconds. This works even when the app is in the background.",
     "storage_title": "Storage Management",

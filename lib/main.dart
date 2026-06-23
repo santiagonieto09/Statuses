@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:statuses/app.dart';
 import 'package:statuses/data/repositories/status_repository.dart';
-import 'package:statuses/data/services/share_service.dart';
 import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/download_notifier.dart';
 import 'package:statuses/providers/locale_notifier.dart';
@@ -50,7 +49,6 @@ void main() async {
                     return notifier;
                   },
                 ),
-                Provider(create: (_) => ShareService()),
                 ChangeNotifierProvider(
                   create: (ctx) => NotificationNotifier(ctx.read<StatusNotifier>()),
                 ),

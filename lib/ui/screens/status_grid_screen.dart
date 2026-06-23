@@ -24,7 +24,6 @@ class StatusGridScreen extends StatelessWidget {
           return EmptyState(
             title: t.empty.default_title,
             subtitle: t.empty.default_subtitle,
-            icon: Icons.hourglass_empty_rounded,
             onGrantSaf: needsSafFallback
                 ? () => context.read<StatusNotifier>().grantSafPermission()
                 : null,

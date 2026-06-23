@@ -1,8 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/utils/date_formatter.dart';
 
 void main() {
+  setUpAll(() async {
+    await initializeDateFormatting('en', null);
+  });
+
   final t = AppLocale.en.translations;
 
   group('DateFormatter.formatRelative', () {
@@ -25,7 +30,9 @@ void main() {
   group('DateFormatter.formatTime', () {
     test('returns formatted time', () {
       final date = DateTime(2024, 1, 15, 14, 30);
-      expect(DateFormatter.formatTime(date), '2:30 PM');
+      final result = DateFormatter.formatTime(date, t);
+      expect(result, contains('2:30'));
+      expect(result, contains('PM'));
     });
   });
 

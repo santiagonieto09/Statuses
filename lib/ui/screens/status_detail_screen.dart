@@ -268,78 +268,84 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
   }
 
   Future<void> _handleMenuAction(String value, BuildContext context) async {
-    final t = Translations.of(context);
     switch (value) {
       case 'download':
-        {
-          final notifier = context.read<DownloadNotifier>();
-          await notifier.downloadStatus(_current);
-          if (context.mounted) {
-            final success = notifier.error == null;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Icon(
-                      success
-                          ? Icons.check_circle_rounded
-                          : Icons.error_rounded,
-                      color: Colors.white,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        success
-                            ? t.detail.saved_successfully
-                            : notifier.error!,
-                      ),
-                    ),
-                  ],
-                ),
-                backgroundColor: success ? Colors.green[700] : Colors.red[700],
-                behavior: SnackBarBehavior.floating,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
-          break;
-        }
+        return _handleDownload(context);
       case 'share':
-        {
-          final notifier = context.read<DownloadNotifier>();
-          await notifier.shareStatus(_current);
-          break;
-        }
+        return _handleShare(context);
       case 'info':
-        if (context.mounted) {
-          showDialog(
-            context: context,
-            builder: (_) => AlertDialog(
-              title: Text(t.detail.file_info),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('${t.detail.name}: ${_current.fileName}'),
-                  const SizedBox(height: 4),
-                  Text('${t.detail.size}: ${FileUtils.formatFileSize(_current.fileSize)}'),
-                  const SizedBox(height: 4),
-                  Text('${t.detail.type}: ${_current.mediaType.name}'),
-                  const SizedBox(height: 4),
-                  Text(
-                      '${t.detail.date}: ${DateFormatter.formatDateTime(_current.lastModified, t)}'),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(t.detail.close),
-                ),
-              ],
-            ),
-          );
-        }
+        return _showFileInfo(context);
     }
+  }
+
+  Future<void> _handleDownload(BuildContext context) async {
+    final t = Translations.of(context);
+    final notifier = context.read<DownloadNotifier>();
+    await notifier.downloadStatus(_current);
+    if (context.mounted) {
+      final success = notifier.error == null;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(
+                success
+                    ? Icons.check_circle_rounded
+                    : Icons.error_rounded,
+                color: Colors.white,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  success
+                      ? t.detail.saved_successfully
+                      : notifier.error!,
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: success ? Colors.green[700] : Colors.red[700],
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleShare(BuildContext context) async {
+    final notifier = context.read<DownloadNotifier>();
+    await notifier.shareStatus(_current);
+  }
+
+  Future<void> _showFileInfo(BuildContext context) async {
+    final t = Translations.of(context);
+    if (!context.mounted) return;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(t.detail.file_info),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('${t.detail.name}: ${_current.fileName}'),
+            const SizedBox(height: 4),
+            Text('${t.detail.size}: ${FileUtils.formatFileSize(_current.fileSize)}'),
+            const SizedBox(height: 4),
+            Text('${t.detail.type}: ${_current.mediaType.name}'),
+            const SizedBox(height: 4),
+            Text(
+                '${t.detail.date}: ${DateFormatter.formatDateTime(_current.lastModified, t)}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(t.detail.close),
+          ),
+        ],
+      ),
+    );
   }
 }

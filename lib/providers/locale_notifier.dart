@@ -6,13 +6,25 @@ class LocaleNotifier extends ChangeNotifier {
   static const String _key = 'locale';
 
   AppLocale _locale = AppLocale.en;
+  bool _initialized = false;
 
   AppLocale get locale => _locale;
+  bool get isInitialized => _initialized;
 
   Locale get flutterLocale => _locale.flutterLocale;
 
   LocaleNotifier() {
-    _loadLocale();
+    _init();
+  }
+
+  Future<void> _init() async {
+    try {
+      await _loadLocale();
+    } catch (_) {
+      _locale = AppLocale.en;
+    }
+    _initialized = true;
+    notifyListeners();
   }
 
   Future<void> _loadLocale() async {
@@ -23,15 +35,18 @@ class LocaleNotifier extends ChangeNotifier {
         (l) => l.languageTag == saved,
         orElse: () => AppLocale.en,
       );
-      notifyListeners();
     }
   }
 
   Future<void> setLocale(AppLocale locale) async {
     _locale = locale;
+    await LocaleSettings.setLocale(locale);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_key, locale.languageTag);
+    } catch (_) {
+      // Persistence failed but locale already applied
+    }
     notifyListeners();
-    LocaleSettings.setLocale(locale);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, locale.languageTag);
   }
 }

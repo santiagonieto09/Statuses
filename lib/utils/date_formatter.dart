@@ -19,14 +19,14 @@ class DateFormatter {
           : t.date.weeks_ago(count: weekDifference);
     }
 
-    return DateFormat('MMM d, yyyy').format(date);
+    return DateFormat.yMMMd(t.$meta.locale.languageCode).format(date);
   }
 
-  static String formatTime(DateTime date) {
-    return DateFormat('h:mm a').format(date);
+  static String formatTime(DateTime date, Translations t) {
+    return DateFormat.jm(t.$meta.locale.languageCode).format(date);
   }
 
   static String formatDateTime(DateTime date, Translations t) {
-    return '${formatRelative(date, t)} ${t.date.at} ${formatTime(date)}';
+    return '${formatRelative(date, t)} ${t.date.at} ${formatTime(date, t)}';
   }
 }

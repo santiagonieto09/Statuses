@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/status_notifier.dart';
 import 'package:statuses/ui/screens/status_detail_screen.dart';
 import 'package:statuses/ui/widgets/empty_state.dart';
@@ -12,6 +13,7 @@ class StatusListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = Translations.of(context);
     return Consumer<StatusNotifier>(
       builder: (context, notifier, _) {
         if (notifier.isLoading) {
@@ -21,6 +23,9 @@ class StatusListScreen extends StatelessWidget {
         final statuses = notifier.filteredStatuses;
         if (statuses.isEmpty) {
           return EmptyState(
+            title: t.empty.default_title,
+            subtitle: t.empty.default_subtitle,
+            icon: Icons.hourglass_empty_rounded,
             onGrantSaf: needsSafFallback
                 ? () => context.read<StatusNotifier>().grantSafPermission()
                 : null,

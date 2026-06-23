@@ -1,0 +1,76 @@
+{
+  "app": {
+    "title": "Statuses"
+  },
+  "filter": {
+    "all": "Todo",
+    "photos": "Fotos",
+    "videos": "Videos"
+  },
+  "nav": {
+    "statuses": "Estados",
+    "saved": "Guardados"
+  },
+  "detail": {
+    "download": "Descargar",
+    "share": "Compartir",
+    "info": "Información",
+    "close": "Cerrar",
+    "file_info": "Información del archivo",
+    "name": "Nombre",
+    "size": "Tamaño",
+    "type": "Tipo",
+    "date": "Fecha",
+    "file_not_found": "Archivo no encontrado",
+    "unable_to_load_image": "No se pudo cargar la imagen",
+    "loading_video": "Cargando video...",
+    "unsupported_file_type": "Tipo de archivo no soportado",
+    "saved_successfully": "Archivo guardado correctamente",
+    "video_badge": "VIDEO"
+  },
+  "saved": {
+    "empty_title": "Sin estados guardados",
+    "empty_subtitle": "Los estados que descargues aparecerán aquí.",
+    "empty_filtered_title": "Sin resultados",
+    "empty_filtered_subtitle": "No hay archivos guardados de este tipo.",
+    "delete_title": "Eliminar archivos",
+    "delete_message": "Se eliminará(n) $count archivo(s) permanentemente.\nEsta acción no se puede deshacer.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "selected_count": "$count seleccionado(s)",
+    "cancel_selection_tooltip": "Cancelar selección",
+    "delete_selected_tooltip": "Eliminar seleccionados",
+    "file_count": "$count archivo(s)",
+    "header_path": "Pictures/$dirName"
+  },
+  "permission": {
+    "title": "Acceso al almacenamiento requerido",
+    "description": "Statuses necesita acceso a tu almacenamiento para leer los archivos multimedia de estados de WhatsApp. Tus archivos permanecen en tu dispositivo.",
+    "grant_access": "Conceder acceso",
+    "permanently_denied": "El permiso fue denegado permanentemente.\nActívalo en Ajustes.",
+    "open_settings": "Abrir Ajustes",
+    "privacy_note": "Tus datos permanecen en tu dispositivo.\nStatuses no recopila ninguna información."
+  },
+  "empty": {
+    "default_title": "No se encontraron estados",
+    "default_subtitle": "Abre WhatsApp, ve algunos estados y vuelve aquí.",
+    "saf_instructions": "Si el problema persiste, concede acceso manual a la carpeta:",
+    "saf_button": "Seleccionar carpeta .Statuses"
+  },
+  "date": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "days_ago": "hace $count días",
+    "week_ago": "hace 1 semana",
+    "weeks_ago": "hace $count semanas",
+    "at": "a las"
+  },
+  "settings": {
+    "language": "Idioma",
+    "theme": "Tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "toggle_view": "Cambiar vista",
+    "toggle_theme": "Cambiar tema"
+  }
+}

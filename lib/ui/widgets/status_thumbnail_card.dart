@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:statuses/data/models/status_file.dart';
 import 'package:statuses/data/services/video_thumbnail_service.dart';
+import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/ui/theme/app_theme.dart';
 import 'package:statuses/utils/date_formatter.dart';
 import 'package:statuses/utils/file_utils.dart';
@@ -130,21 +131,21 @@ class StatusThumbnailCard extends StatelessWidget {
   }
 
   Widget _buildBadge(BuildContext context) {
-    // Solo se muestra para videos
+    final t = Translations.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
         color: Colors.black54,
         borderRadius: BorderRadius.circular(4),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.play_arrow_rounded, color: Colors.white, size: 14),
-          SizedBox(width: 2),
+          const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 14),
+          const SizedBox(width: 2),
           Text(
-            'VIDEO',
-            style: TextStyle(
+            t.detail.video_badge,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 9,
               fontWeight: FontWeight.w600,
@@ -216,7 +217,7 @@ class StatusListItem extends StatelessWidget {
       ),
       subtitle: Row(
         children: [
-          Text(DateFormatter.formatRelative(status.lastModified)),
+          Text(DateFormatter.formatRelative(status.lastModified, Translations.of(context))),
           const SizedBox(width: 8),
           Text(
             FileUtils.formatFileSize(status.fileSize),

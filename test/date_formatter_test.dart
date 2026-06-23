@@ -1,21 +1,24 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/utils/date_formatter.dart';
 
 void main() {
+  final t = AppLocale.en.translations;
+
   group('DateFormatter.formatRelative', () {
     test('returns Today for current date', () {
       final now = DateTime.now();
-      expect(DateFormatter.formatRelative(now), 'Today');
+      expect(DateFormatter.formatRelative(now, t), 'Today');
     });
 
     test('returns Yesterday for yesterday', () {
       final yesterday = DateTime.now().subtract(const Duration(days: 1));
-      expect(DateFormatter.formatRelative(yesterday), 'Yesterday');
+      expect(DateFormatter.formatRelative(yesterday, t), 'Yesterday');
     });
 
     test('returns days ago for recent dates', () {
       final threeDaysAgo = DateTime.now().subtract(const Duration(days: 3));
-      expect(DateFormatter.formatRelative(threeDaysAgo), '3 days ago');
+      expect(DateFormatter.formatRelative(threeDaysAgo, t), '3 days ago');
     });
   });
 
@@ -29,7 +32,7 @@ void main() {
   group('DateFormatter.formatDateTime', () {
     test('returns combined date and time', () {
       final now = DateTime.now();
-      final result = DateFormatter.formatDateTime(now);
+      final result = DateFormatter.formatDateTime(now, t);
       expect(result, contains('Today'));
       expect(result, contains('at'));
     });

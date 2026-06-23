@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:statuses/data/models/status_file.dart';
+import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/download_notifier.dart';
 import 'package:statuses/utils/date_formatter.dart';
 import 'package:statuses/utils/file_utils.dart';
@@ -78,6 +79,7 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = Translations.of(context);
     final showSubtitle = widget.statuses.length > 1;
     return Scaffold(
       backgroundColor: Colors.black,
@@ -103,9 +105,9 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
             icon: const Icon(Icons.more_vert, color: Colors.white),
             onSelected: (value) => _handleMenuAction(value, context),
             itemBuilder: (_) => [
-              const PopupMenuItem(value: 'download', child: Text('Download')),
-              const PopupMenuItem(value: 'share', child: Text('Share')),
-              const PopupMenuItem(value: 'info', child: Text('Info')),
+              PopupMenuItem(value: 'download', child: Text(t.detail.download)),
+              PopupMenuItem(value: 'share', child: Text(t.detail.share)),
+              PopupMenuItem(value: 'info', child: Text(t.detail.info)),
             ],
           ),
         ],
@@ -131,10 +133,12 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
   }
 
   Widget _buildPage(BuildContext context, StatusFile status, bool isActive) {
+    final t = Translations.of(context);
     final file = File(status.filePath);
     if (!file.existsSync()) {
-      return const Center(
-        child: Text('File not found', style: TextStyle(color: Colors.white)),
+      return Center(
+        child: Text(t.detail.file_not_found,
+            style: const TextStyle(color: Colors.white)),
       );
     }
 
@@ -147,23 +151,23 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
             child: Image.file(
               file,
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Center(
-                child: Text('Unable to load image',
-                    style: TextStyle(color: Colors.white)),
+              errorBuilder: (_, __, ___) => Center(
+                child: Text(t.detail.unable_to_load_image,
+                    style: const TextStyle(color: Colors.white)),
               ),
             ),
           ),
         );
       case MediaType.video:
         if (!isActive || !_isVideoInitialized || _videoController == null) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(color: Colors.white54),
-                SizedBox(height: 16),
-                Text('Loading video...',
-                    style: TextStyle(color: Colors.white70)),
+                const CircularProgressIndicator(color: Colors.white54),
+                const SizedBox(height: 16),
+                Text(t.detail.loading_video,
+                    style: const TextStyle(color: Colors.white70)),
               ],
             ),
           );
@@ -204,14 +208,15 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
           ),
         );
       default:
-        return const Center(
-          child: Text('Unsupported file type',
-              style: TextStyle(color: Colors.white)),
+        return Center(
+          child: Text(t.detail.unsupported_file_type,
+              style: const TextStyle(color: Colors.white)),
         );
     }
   }
 
   Widget _buildBottomBar(BuildContext context) {
+    final t = Translations.of(context);
     return Container(
       color: Colors.black87,
       padding: EdgeInsets.only(
@@ -225,17 +230,17 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
         children: [
           _buildActionButton(
             icon: Icons.download_rounded,
-            label: 'Download',
+            label: t.detail.download,
             onTap: () => _handleMenuAction('download', context),
           ),
           _buildActionButton(
             icon: Icons.share_rounded,
-            label: 'Share',
+            label: t.detail.share,
             onTap: () => _handleMenuAction('share', context),
           ),
           _buildActionButton(
             icon: Icons.info_outline_rounded,
-            label: 'Info',
+            label: t.detail.info,
             onTap: () => _handleMenuAction('info', context),
           ),
         ],
@@ -263,6 +268,7 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
   }
 
   Future<void> _handleMenuAction(String value, BuildContext context) async {
+    final t = Translations.of(context);
     switch (value) {
       case 'download':
         {
@@ -285,7 +291,7 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
                     Expanded(
                       child: Text(
                         success
-                            ? 'Archivo guardado correctamente'
+                            ? t.detail.saved_successfully
                             : notifier.error!,
                       ),
                     ),
@@ -310,25 +316,25 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
           showDialog(
             context: context,
             builder: (_) => AlertDialog(
-              title: const Text('File Info'),
+              title: Text(t.detail.file_info),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Name: ${_current.fileName}'),
+                  Text('${t.detail.name}: ${_current.fileName}'),
                   const SizedBox(height: 4),
-                  Text('Size: ${FileUtils.formatFileSize(_current.fileSize)}'),
+                  Text('${t.detail.size}: ${FileUtils.formatFileSize(_current.fileSize)}'),
                   const SizedBox(height: 4),
-                  Text('Type: ${_current.mediaType.name}'),
+                  Text('${t.detail.type}: ${_current.mediaType.name}'),
                   const SizedBox(height: 4),
                   Text(
-                      'Date: ${DateFormatter.formatDateTime(_current.lastModified)}'),
+                      '${t.detail.date}: ${DateFormatter.formatDateTime(_current.lastModified, t)}'),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
+                  child: Text(t.detail.close),
                 ),
               ],
             ),

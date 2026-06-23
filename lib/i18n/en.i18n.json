@@ -1,0 +1,76 @@
+{
+  "app": {
+    "title": "Statuses"
+  },
+  "filter": {
+    "all": "All",
+    "photos": "Photos",
+    "videos": "Videos"
+  },
+  "nav": {
+    "statuses": "Statuses",
+    "saved": "Saved"
+  },
+  "detail": {
+    "download": "Download",
+    "share": "Share",
+    "info": "Info",
+    "close": "Close",
+    "file_info": "File Info",
+    "name": "Name",
+    "size": "Size",
+    "type": "Type",
+    "date": "Date",
+    "file_not_found": "File not found",
+    "unable_to_load_image": "Unable to load image",
+    "loading_video": "Loading video...",
+    "unsupported_file_type": "Unsupported file type",
+    "saved_successfully": "File saved successfully",
+    "video_badge": "VIDEO"
+  },
+  "saved": {
+    "empty_title": "No saved statuses",
+    "empty_subtitle": "Statuses you download will appear here.",
+    "empty_filtered_title": "No results",
+    "empty_filtered_subtitle": "No saved files of this type.",
+    "delete_title": "Delete files",
+    "delete_message": "$count file(s) will be permanently deleted.\nThis action cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "selected_count": "$count selected",
+    "cancel_selection_tooltip": "Cancel selection",
+    "delete_selected_tooltip": "Delete selected",
+    "file_count": "$count file(s)",
+    "header_path": "Pictures/$dirName"
+  },
+  "permission": {
+    "title": "Storage Access Required",
+    "description": "Statuses needs access to your storage to read WhatsApp status media files. Your files remain on your device.",
+    "grant_access": "Grant Access",
+    "permanently_denied": "Permission was permanently denied.\nPlease enable it in Settings.",
+    "open_settings": "Open Settings",
+    "privacy_note": "Your data stays on your device.\nStatuses does not collect any information."
+  },
+  "empty": {
+    "default_title": "No statuses found",
+    "default_subtitle": "Open WhatsApp, view some statuses, then come back here.",
+    "saf_instructions": "If the problem persists, grant manual access to the folder:",
+    "saf_button": "Select .Statuses folder"
+  },
+  "date": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "days_ago": "$count days ago",
+    "week_ago": "1 week ago",
+    "weeks_ago": "$count weeks ago",
+    "at": "at"
+  },
+  "settings": {
+    "language": "Language",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "toggle_view": "Toggle view",
+    "toggle_theme": "Toggle theme"
+  }
+}

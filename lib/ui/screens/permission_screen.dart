@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:statuses/data/services/permission_service.dart';
+import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/ui/theme/app_theme.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key, this.initialState});
 
-  /// When provided, the permission check was already done before navigation.
   final PermissionState? initialState;
 
   @override
@@ -87,10 +87,11 @@ class _PermissionScreenState extends State<PermissionScreen>
 
   @override
   Widget build(BuildContext context) {
+    final t = Translations.of(context);
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
-        child: _isChecking ? _buildChecking() : _buildContent(),
+        child: _isChecking ? _buildChecking() : _buildContent(t),
       ),
     );
   }
@@ -108,7 +109,7 @@ class _PermissionScreenState extends State<PermissionScreen>
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(Translations t) {
     return Padding(
       padding: const EdgeInsets.all(32),
       child: Column(
@@ -130,14 +131,14 @@ class _PermissionScreenState extends State<PermissionScreen>
           ),
           const SizedBox(height: 32),
           Text(
-            'Storage Access Required',
+            t.permission.title,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
           ),
           const SizedBox(height: 12),
           Text(
-            'Statuses needs access to your storage to read WhatsApp status media files. Your files remain on your device.',
+            t.permission.description,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: AppColors.secondaryText,
@@ -145,12 +146,12 @@ class _PermissionScreenState extends State<PermissionScreen>
           ),
           const SizedBox(height: 32),
           if (_state == PermissionState.permanentlyDenied)
-            _buildPermanentlyDenied()
+            _buildPermanentlyDenied(t)
           else
-            _buildGrantButton(),
+            _buildGrantButton(t),
           const Spacer(),
           Text(
-            'Your data stays on your device.\nStatuses does not collect any information.',
+            t.permission.privacy_note,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.secondaryText.withValues(alpha: 0.7),
@@ -162,7 +163,7 @@ class _PermissionScreenState extends State<PermissionScreen>
     );
   }
 
-  Widget _buildGrantButton() {
+  Widget _buildGrantButton(Translations t) {
     return SizedBox(
       width: double.infinity,
       height: 52,
@@ -183,21 +184,21 @@ class _PermissionScreenState extends State<PermissionScreen>
                   color: Colors.white,
                 ),
               )
-            : const Text(
-                'Grant Access',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            : Text(
+                t.permission.grant_access,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
       ),
     );
   }
 
-  Widget _buildPermanentlyDenied() {
+  Widget _buildPermanentlyDenied(Translations t) {
     return Column(
       children: [
         const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 48),
         const SizedBox(height: 16),
         Text(
-          'Permission was permanently denied.\nPlease enable it in Settings.',
+          t.permission.permanently_denied,
           textAlign: TextAlign.center,
           style: TextStyle(color: AppColors.secondaryText),
         ),
@@ -213,9 +214,9 @@ class _PermissionScreenState extends State<PermissionScreen>
                 borderRadius: BorderRadius.circular(AppShapes.buttonRadius),
               ),
             ),
-            child: const Text(
-              'Open Settings',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            child: Text(
+              t.permission.open_settings,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ),

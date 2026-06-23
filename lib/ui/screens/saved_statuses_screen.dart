@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:statuses/constants/app_constants.dart';
 import 'package:statuses/data/models/status_file.dart';
+import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/download_notifier.dart';
 import 'package:statuses/providers/status_notifier.dart';
 import 'package:statuses/ui/screens/status_detail_screen.dart';
@@ -22,7 +23,6 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
   @override
   bool get wantKeepAlive => true;
 
-  // Rutas de los archivos actualmente seleccionados
   final Set<String> _selectedPaths = {};
 
   bool get _isSelecting => _selectedPaths.isNotEmpty;
@@ -52,6 +52,7 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
   void _clearSelection() => setState(() => _selectedPaths.clear());
 
   Future<void> _confirmDelete(BuildContext context) async {
+    final t = Translations.of(context);
     final count = _selectedPaths.length;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -61,21 +62,17 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
           color: Theme.of(ctx).colorScheme.error,
           size: 36,
         ),
-        title: const Text('Eliminar archivos'),
-        content: Text(
-          'Se ${count == 1 ? 'eliminará' : 'eliminarán'} $count '
-          'archivo${count != 1 ? 's' : ''} permanentemente.\n'
-          'Esta acción no se puede deshacer.',
-        ),
+        title: Text(t.saved.delete_title),
+        content: Text(t.saved.delete_message(count: count)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancelar'),
+            child: Text(t.saved.cancel),
           ),
           FilledButton.icon(
             onPressed: () => Navigator.of(ctx).pop(true),
             icon: const Icon(Icons.delete_rounded),
-            label: const Text('Eliminar'),
+            label: Text(t.saved.delete),
             style: FilledButton.styleFrom(
               backgroundColor: Theme.of(ctx).colorScheme.error,
               foregroundColor: Theme.of(ctx).colorScheme.onError,
@@ -95,10 +92,10 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
 
   @override
   Widget build(BuildContext context) {
+    final t = Translations.of(context);
     super.build(context);
     return Column(
       children: [
-        // Barra de selección — aparece solo cuando hay items seleccionados
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 200),
           transitionBuilder: (child, animation) => SizeTransition(
@@ -110,12 +107,10 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
               : const SizedBox.shrink(),
         ),
 
-        // Contenido principal
         Expanded(
           child: Consumer2<StatusNotifier, DownloadNotifier>(
             builder: (context, statusNotifier, downloadNotifier, _) {
               final isGrid = statusNotifier.viewMode == ViewMode.grid;
-              // Aplicar filtro de foto/video al igual que en la pestaña Statuses
               final filterMode = statusNotifier.filterMode;
               final filtered = filterMode == FilterMode.all
                   ? downloadNotifier.savedStatuses
@@ -132,11 +127,11 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
               if (filtered.isEmpty) {
                 return EmptyState(
                   title: downloadNotifier.hasSaved
-                      ? 'Sin resultados'
-                      : 'No saved statuses',
+                      ? t.saved.empty_filtered_title
+                      : t.saved.empty_title,
                   subtitle: downloadNotifier.hasSaved
-                      ? 'No hay archivos guardados de este tipo.'
-                      : 'Los estados que descargues aparecerán aquí.',
+                      ? t.saved.empty_filtered_subtitle
+                      : t.saved.empty_subtitle,
                   icon: downloadNotifier.hasSaved
                       ? Icons.filter_list_off_rounded
                       : Icons.download_rounded,
@@ -145,7 +140,7 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
 
               return RefreshIndicator(
                 onRefresh: _isSelecting
-                    ? () async {} // bloquea el pull-to-refresh en modo seleccion
+                    ? () async {}
                     : () => downloadNotifier.loadSavedStatuses(),
                 child: CustomScrollView(
                   slivers: [
@@ -169,11 +164,8 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
     );
   }
 
-  // ──────────────────────────────────────────────────────────────
-  // Widgets auxiliares
-  // ──────────────────────────────────────────────────────────────
-
   Widget _buildSelectionBar(BuildContext context) {
+    final t = Translations.of(context);
     final colorScheme = Theme.of(context).colorScheme;
     return Container(
       key: const ValueKey('selectionBar'),
@@ -181,29 +173,25 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       child: Row(
         children: [
-          // Botón cancelar selección
           IconButton(
             icon: const Icon(Icons.close_rounded),
             color: colorScheme.onPrimaryContainer,
-            tooltip: 'Cancelar seleccion',
+            tooltip: t.saved.cancel_selection_tooltip,
             onPressed: _clearSelection,
           ),
-          // Contador de seleccionados
           Expanded(
             child: Text(
-              '${_selectedPaths.length} '
-              'seleccionado${_selectedPaths.length != 1 ? 's' : ''}',
+              t.saved.selected_count(count: _selectedPaths.length),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.w600,
                   ),
             ),
           ),
-          // Botón eliminar
           IconButton(
             icon: const Icon(Icons.delete_rounded),
             color: colorScheme.error,
-            tooltip: 'Eliminar seleccionados',
+            tooltip: t.saved.delete_selected_tooltip,
             onPressed: () => _confirmDelete(context),
           ),
         ],
@@ -211,7 +199,6 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
     );
   }
 
-  // Construye el delegate compartido para grid y lista
   SliverChildBuilderDelegate _itemDelegate(
     BuildContext context,
     List<StatusFile> statuses, {
@@ -276,6 +263,7 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
 
   Widget _buildHeader(
       BuildContext context, DownloadNotifier notifier, int count) {
+    final t = Translations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
       child: Row(
@@ -287,7 +275,7 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
           ),
           const SizedBox(width: 6),
           Text(
-            'Pictures/${AppConstants.savedDirName}',
+            t.saved.header_path(dirName: AppConstants.savedDirName),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -300,7 +288,7 @@ class _SavedStatusesScreenState extends State<SavedStatusesScreen>
           ),
           const SizedBox(width: 6),
           Text(
-            '$count archivo${count != 1 ? 's' : ''}',
+            t.saved.file_count(count: count),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),

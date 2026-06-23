@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
   provider: ^6.1.2
@@ -22,11 +24,15 @@ dependencies:
   path: ^1.9.0
   device_info_plus: ^13.1.0
   video_thumbnail: ^0.5.3
+  slang: ^4.5.0
+  slang_flutter: ^4.5.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  build_runner: ^2.4.0
+  slang_build_runner: ^4.5.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

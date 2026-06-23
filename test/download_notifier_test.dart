@@ -23,6 +23,7 @@ void main() {
       expect(notifier.savedCount, 0);
       expect(notifier.error, isNull);
       expect(notifier.autoSaveEnabled, false);
+      expect(notifier.isSyncing, false);
     });
 
     test('auto-save toggle saves preference', () async {
@@ -31,6 +32,21 @@ void main() {
       expect(notifier.autoSaveEnabled, true);
       await notifier.toggleAutoSave(false);
       expect(notifier.autoSaveEnabled, false);
+    });
+
+    test('isSyncing is true during auto-save activation', () async {
+      expect(notifier.isSyncing, false);
+      final future = notifier.toggleAutoSave(true);
+      expect(notifier.isSyncing, true);
+      await future;
+      expect(notifier.isSyncing, false);
+    });
+
+    test('isSyncing blocks multiple toggles', () async {
+      final first = notifier.toggleAutoSave(true);
+      await notifier.toggleAutoSave(false);
+      expect(notifier.autoSaveEnabled, true);
+      await first;
     });
 
     test('downloadStatus catches error when path invalid', () async {

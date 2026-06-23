@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:statuses/data/models/status_file.dart';
+import 'package:statuses/data/services/share_service.dart';
 import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/download_notifier.dart';
+import 'package:statuses/ui/theme/app_theme.dart';
 import 'package:statuses/utils/date_formatter.dart';
 import 'package:statuses/utils/file_utils.dart';
 
@@ -74,6 +76,11 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
     }
   }
 
+  bool _isSaved(BuildContext context) {
+    final savedPaths = context.read<DownloadNotifier>().savedFilePaths;
+    return savedPaths.contains(_current.fileName);
+  }
+
   void _onPageChanged(int index) {
     _videoController?.pause();
     final old = _videoController;
@@ -105,9 +112,22 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              _current.fileNameWithoutExtension,
-              style: const TextStyle(fontSize: 14),
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    _current.fileNameWithoutExtension,
+                    style: const TextStyle(fontSize: 14),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (_isSaved(context))
+                  const Padding(
+                    padding: EdgeInsets.only(left: 6),
+                    child: Icon(Icons.check_circle_rounded,
+                        color: AppColors.accentGreen, size: 16),
+                  ),
+              ],
             ),
             if (showSubtitle)
               Text(
@@ -122,6 +142,7 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
             onSelected: (value) => _handleMenuAction(value, context),
             itemBuilder: (_) => [
               PopupMenuItem(value: 'download', child: Text(t.detail.download)),
+              PopupMenuItem(value: 'repost', child: Text(t.detail.repost)),
               PopupMenuItem(value: 'share', child: Text(t.detail.share)),
               PopupMenuItem(value: 'info', child: Text(t.detail.info)),
             ],
@@ -245,9 +266,17 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildActionButton(
-            icon: Icons.download_rounded,
-            label: t.detail.download,
+            icon: _isSaved(context)
+                ? Icons.check_circle_rounded
+                : Icons.download_rounded,
+            label: _isSaved(context) ? t.detail.saved_badge : t.detail.download,
+            color: _isSaved(context) ? AppColors.accentGreen : Colors.white70,
             onTap: () => _handleMenuAction('download', context),
+          ),
+          _buildActionButton(
+            icon: Icons.repeat_rounded,
+            label: t.detail.repost,
+            onTap: () => _handleMenuAction('repost', context),
           ),
           _buildActionButton(
             icon: Icons.share_rounded,
@@ -268,16 +297,17 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    Color color = Colors.white70,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white70, size: 24),
+          Icon(icon, color: color, size: 24),
           const SizedBox(height: 4),
           Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 11)),
+              style: TextStyle(color: color, fontSize: 11)),
         ],
       ),
     );
@@ -287,6 +317,8 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
     switch (value) {
       case 'download':
         return _handleDownload(context);
+      case 'repost':
+        return _handleRepost(context);
       case 'share':
         return _handleShare(context);
       case 'info':
@@ -327,6 +359,11 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
         ),
       );
     }
+  }
+
+  Future<void> _handleRepost(BuildContext context) async {
+    final service = ShareService();
+    await service.repostToWhatsApp(_current);
   }
 
   Future<void> _handleShare(BuildContext context) async {

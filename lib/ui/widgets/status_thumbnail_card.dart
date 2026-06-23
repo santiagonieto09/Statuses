@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:statuses/constants/app_constants.dart';
 import 'package:statuses/data/models/status_file.dart';
 import 'package:statuses/data/services/video_thumbnail_service.dart';
 import 'package:statuses/i18n/translations.g.dart';
+import 'package:statuses/providers/download_notifier.dart';
 import 'package:statuses/ui/theme/app_theme.dart';
 import 'package:statuses/utils/date_formatter.dart';
 import 'package:statuses/utils/file_utils.dart';
@@ -12,6 +14,7 @@ class StatusThumbnailCard extends StatelessWidget {
   final StatusFile status;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  final VoidCallback? onRepost;
   final bool isSelected;
 
   const StatusThumbnailCard({
@@ -19,11 +22,15 @@ class StatusThumbnailCard extends StatelessWidget {
     required this.status,
     this.onTap,
     this.onLongPress,
+    this.onRepost,
     this.isSelected = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isSaved = context.select<DownloadNotifier, bool>(
+      (n) => n.savedFilePaths.contains(status.fileName),
+    );
     return RepaintBoundary(
       child: GestureDetector(
         onTap: onTap,
@@ -40,6 +47,22 @@ class StatusThumbnailCard extends StatelessWidget {
                 top: 4,
                 right: 4,
                 child: _buildBadge(context),
+              ),
+            if (isSaved)
+              Positioned(
+                bottom: 4,
+                right: 4,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: AppColors.accentGreen,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
+                  child: const Icon(Icons.check_rounded,
+                      color: Colors.white, size: 12),
+                ),
               ),
             if (isSelected) ...[
               ClipRRect(
@@ -169,6 +192,7 @@ class StatusListItem extends StatelessWidget {
   final StatusFile status;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
+  final VoidCallback? onRepost;
   final bool isSelected;
 
   const StatusListItem({
@@ -176,11 +200,16 @@ class StatusListItem extends StatelessWidget {
     required this.status,
     this.onTap,
     this.onLongPress,
+    this.onRepost,
     this.isSelected = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final t = Translations.of(context);
+    final isSaved = context.select<DownloadNotifier, bool>(
+      (n) => n.savedFilePaths.contains(status.fileName),
+    );
     return ListTile(
       tileColor: isSelected ? Colors.green.withValues(alpha: 0.15) : null,
       onTap: onTap,
@@ -195,7 +224,22 @@ class StatusListItem extends StatelessWidget {
               child: _buildLeadingImage(context),
             ),
           ),
-          // Indicador de seleccion en esquina inferior derecha del thumbnail
+          if (isSaved)
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: AppColors.accentGreen,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: const Icon(Icons.check_rounded,
+                    color: Colors.white, size: 10),
+              ),
+            ),
           if (isSelected)
             Positioned(
               bottom: 0,
@@ -233,7 +277,23 @@ class StatusListItem extends StatelessWidget {
           ),
         ],
       ),
-      trailing: _buildTrailingIcon(context),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isSaved)
+            Icon(Icons.check_circle_rounded,
+                color: AppColors.accentGreen, size: 18),
+          if (onRepost != null)
+            IconButton(
+              icon: Icon(Icons.repeat_rounded,
+                  color: Theme.of(context).colorScheme.primary, size: 20),
+              tooltip: t.detail.repost,
+              onPressed: onRepost,
+            ),
+          if (_buildTrailingIcon(context) != null)
+            _buildTrailingIcon(context)!,
+        ],
+      ),
     );
   }
 

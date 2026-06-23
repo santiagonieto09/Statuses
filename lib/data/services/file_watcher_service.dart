@@ -2,23 +2,21 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:statuses/constants/app_constants.dart';
-import 'package:statuses/data/repositories/status_repository.dart';
 
 class FileWatcherService {
-  final StatusRepository _repository;
   Timer? _timer;
   List<String> _lastSnapshot = [];
   final _controller = StreamController<List<String>>.broadcast();
 
   Stream<List<String>> get changes => _controller.stream;
 
-  FileWatcherService(this._repository);
+  FileWatcherService(dynamic _);
 
   void start() {
     _timer = Timer.periodic(AppConstants.pollInterval, (_) async {
       final sw = Stopwatch()..start();
       final changedFiles = await _quickCheck();
-      debugPrint('FileWatcherService._quickCheck: ${sw.elapsedMilliseconds}ms');
+      debugPrint('FileWatcherService: ${sw.elapsedMilliseconds}ms, dirs: ${AppConstants.whatsappStatusPaths.length}');
       if (changedFiles != null) {
         _lastSnapshot = changedFiles;
         _controller.add(changedFiles);

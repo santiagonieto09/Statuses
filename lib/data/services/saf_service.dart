@@ -75,7 +75,6 @@ class SafService {
       final fileSize = (raw['size'] as num?)?.toInt() ?? 0;
       final lastModifiedMs = (raw['lastModified'] as num?)?.toInt() ?? 0;
 
-      final cacheKey = '${fileUri}_$lastModifiedMs';
       final cachedFile = File('${cacheDir.path}/$name');
 
       bool needsCopy = true;

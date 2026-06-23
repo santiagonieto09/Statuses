@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:statuses/data/services/permission_service.dart';
 import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/ui/theme/app_theme.dart';
+import 'package:statuses/ui/widgets/language_selector.dart';
 
 class PermissionScreen extends StatefulWidget {
   const PermissionScreen({super.key, this.initialState});
@@ -115,6 +116,10 @@ class _PermissionScreenState extends State<PermissionScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: LanguageSelector(compact: true),
+          ),
           const Spacer(),
           Container(
             width: 100,

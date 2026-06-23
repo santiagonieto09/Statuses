@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:statuses/i18n/translations.g.dart';
-import 'package:statuses/providers/locale_notifier.dart';
 import 'package:statuses/providers/theme_notifier.dart';
+import 'package:statuses/ui/widgets/language_selector.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -16,7 +16,7 @@ class SettingsScreen extends StatelessWidget {
         child: ListView(
         children: [
           _SectionHeader(title: t.settings.appearance),
-          _LanguageTile(),
+          const LanguageSelector(),
           _ThemeTile(),
           const Divider(),
           _SectionHeader(title: t.settings.help),
@@ -80,37 +80,6 @@ class _SectionHeader extends StatelessWidget {
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.w600,
             ),
-      ),
-    );
-  }
-}
-
-class _LanguageTile extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final t = Translations.of(context);
-    final localeNotifier = context.watch<LocaleNotifier>();
-    return ListTile(
-      leading: const Icon(Icons.translate_rounded),
-      title: Text(t.settings.language),
-      trailing: DropdownButton<AppLocale>(
-        value: localeNotifier.locale,
-        underline: const SizedBox(),
-        items: [
-          DropdownMenuItem(
-            value: AppLocale.en,
-            child: const Text('English'),
-          ),
-          DropdownMenuItem(
-            value: AppLocale.es,
-            child: const Text('Español'),
-          ),
-        ],
-        onChanged: (locale) {
-          if (locale != null) {
-            localeNotifier.setLocale(locale);
-          }
-        },
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:statuses/constants/app_constants.dart';
 import 'package:statuses/data/models/status_file.dart';
 import 'package:statuses/data/services/saf_service.dart';
@@ -26,22 +27,30 @@ class StatusRepository {
   /// Primero intenta acceso directo por ruta; si no encuentra ningún
   /// directorio válido, usa el fallback SAF (si el usuario ya concedió acceso).
   Future<List<StatusFile>> loadStatuses() async {
+    final sw = Stopwatch()..start();
+
     final dirs = await _discoverDirectories();
 
     if (dirs.isNotEmpty) {
-      return _loadFromDirectories(dirs);
+      final result = await _loadFromDirectories(dirs);
+      debugPrint('StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (direct, ${result.length} files)');
+      return result;
     }
 
     // Fallback: Storage Access Framework
     final safUri = await _safService.getGrantedUri();
     if (safUri != null) {
-      return _safService.loadStatuses(safUri);
+      final result = await _safService.loadStatuses(safUri);
+      debugPrint('StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (SAF, ${result.length} files)');
+      return result;
     }
 
+    debugPrint('StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (no directories found)');
     return [];
   }
 
   Future<List<StatusFile>> _loadFromDirectories(List<String> dirs) async {
+    final sw = Stopwatch()..start();
     final files = <StatusFile>[];
     final seenNames = <String>{}; // deduplicación por nombre de archivo
 
@@ -77,6 +86,7 @@ class StatusRepository {
     }
 
     files.sort((a, b) => b.lastModified.compareTo(a.lastModified));
+    debugPrint('StatusRepository._loadFromDirectories: ${sw.elapsedMilliseconds}ms for ${files.length} files');
     return files;
   }
 

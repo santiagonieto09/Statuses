@@ -50,12 +50,14 @@ class StatusNotifier extends ChangeNotifier {
   }
 
   Future<void> loadStatuses() async {
+    final sw = Stopwatch()..start();
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
       _statuses = await _repository.loadStatuses();
+      debugPrint('StatusNotifier.loadStatuses: ${sw.elapsedMilliseconds}ms, ${_statuses.length} files');
       _needsSafFallback =
           _statuses.isEmpty && await _repository.needsSafFallback();
 

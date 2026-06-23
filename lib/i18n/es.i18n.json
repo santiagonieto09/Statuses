@@ -46,7 +46,9 @@
     "cancel_selection_tooltip": "Cancelar selecci\u00f3n",
     "delete_selected_tooltip": "Eliminar seleccionados",
     "file_count": "$count archivo(s)",
-    "header_path": "Pictures/$dirName"
+    "header_path": "Pictures/$dirName",
+    "select_all": "Seleccionar todo",
+    "deselect_all": "Deseleccionar todo"
   },
   "permission": {
     "title": "Permitir acceso al almacenamiento",
@@ -95,7 +97,11 @@
     "about": "Acerca de",
     "app_name": "Statuses",
     "app_description": "Visualiza y gestiona archivos multimedia de historias de WhatsApp",
-    "version": "Versi\u00f3n"
+    "version": "Versi\u00f3n",
+    "enable": "Activar",
+    "auto_save_warning_title": "Activar guardado autom\u00e1tico",
+    "auto_save_warning_message": "Al activar esta opci\u00f3n, todos los estados visibles actualmente se guardar\u00e1n autom\u00e1ticamente en tu dispositivo. La app monitorear\u00e1 continuamente y guardar\u00e1 nuevos estados.",
+    "auto_save_warning_dont_show_again": "No mostrar de nuevo"
   },
   "help": {
     "title": "Centro de ayuda",

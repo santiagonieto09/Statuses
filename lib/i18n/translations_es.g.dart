@@ -133,6 +133,8 @@ class _Translations$saved$es extends Translations$saved$en {
 	@override String get delete_selected_tooltip => 'Eliminar seleccionados';
 	@override String file_count({required Object count}) => '${count} archivo(s)';
 	@override String header_path({required Object dirName}) => 'Pictures/${dirName}';
+	@override String get select_all => 'Seleccionar todo';
+	@override String get deselect_all => 'Deseleccionar todo';
 }
 
 // Path: permission
@@ -210,6 +212,10 @@ class _Translations$settings$es extends Translations$settings$en {
 	@override String get app_name => 'Statuses';
 	@override String get app_description => 'Visualiza y gestiona archivos multimedia de historias de WhatsApp';
 	@override String get version => 'Versión';
+	@override String get enable => 'Activar';
+	@override String get auto_save_warning_title => 'Activar guardado automático';
+	@override String get auto_save_warning_message => 'Al activar esta opción, todos los estados visibles actualmente se guardarán automáticamente en tu dispositivo. La app monitoreará continuamente y guardará nuevos estados.';
+	@override String get auto_save_warning_dont_show_again => 'No mostrar de nuevo';
 }
 
 // Path: help
@@ -317,6 +323,8 @@ extension on TranslationsEs {
 			'saved.delete_selected_tooltip' => 'Eliminar seleccionados',
 			'saved.file_count' => ({required Object count}) => '${count} archivo(s)',
 			'saved.header_path' => ({required Object dirName}) => 'Pictures/${dirName}',
+			'saved.select_all' => 'Seleccionar todo',
+			'saved.deselect_all' => 'Deseleccionar todo',
 			'permission.title' => 'Permitir acceso al almacenamiento',
 			'permission.description' => 'Statuses necesita acceso al almacenamiento para localizar y mostrar los estados multimedia disponibles en tu dispositivo.',
 			'permission.grant_access' => 'Conceder acceso',
@@ -358,6 +366,10 @@ extension on TranslationsEs {
 			'settings.app_name' => 'Statuses',
 			'settings.app_description' => 'Visualiza y gestiona archivos multimedia de historias de WhatsApp',
 			'settings.version' => 'Versión',
+			'settings.enable' => 'Activar',
+			'settings.auto_save_warning_title' => 'Activar guardado automático',
+			'settings.auto_save_warning_message' => 'Al activar esta opción, todos los estados visibles actualmente se guardarán automáticamente en tu dispositivo. La app monitoreará continuamente y guardará nuevos estados.',
+			'settings.auto_save_warning_dont_show_again' => 'No mostrar de nuevo',
 			'help.title' => 'Centro de ayuda',
 			'help.how_to_use_title' => 'Cómo usar',
 			'help.grant_permissions_title' => 'Conceder permisos',

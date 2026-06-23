@@ -46,7 +46,9 @@
     "cancel_selection_tooltip": "Cancel selection",
     "delete_selected_tooltip": "Delete selected",
     "file_count": "$count file(s)",
-    "header_path": "Pictures/$dirName"
+    "header_path": "Pictures/$dirName",
+    "select_all": "Select all",
+    "deselect_all": "Deselect all"
   },
   "permission": {
     "title": "Storage Access Required",
@@ -95,7 +97,11 @@
     "about": "About",
     "app_name": "Statuses",
     "app_description": "View and manage WhatsApp story media files",
-    "version": "Version"
+    "version": "Version",
+    "enable": "Enable",
+    "auto_save_warning_title": "Enable auto-save",
+    "auto_save_warning_message": "When enabled, all currently visible statuses will be automatically saved to your device. The app will continuously monitor and save new statuses.",
+    "auto_save_warning_dont_show_again": "Don't show again"
   },
   "help": {
     "title": "Help Center",

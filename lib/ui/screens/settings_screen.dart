@@ -140,16 +140,87 @@ class _NotificationTile extends StatelessWidget {
   }
 }
 
-class _AutoSaveTile extends StatelessWidget {
+class _AutoSaveTile extends StatefulWidget {
+  @override
+  State<_AutoSaveTile> createState() => _AutoSaveTileState();
+}
+
+class _AutoSaveTileState extends State<_AutoSaveTile> {
+  bool _warningDialogOpen = false;
+
+  Future<void> _onToggle(bool value, BuildContext context) async {
+    final notifier = context.read<DownloadNotifier>();
+    if (!value) {
+      await notifier.toggleAutoSave(false);
+      return;
+    }
+    if (notifier.autoSaveWarningDismissed) {
+      await notifier.toggleAutoSave(true);
+      return;
+    }
+    if (_warningDialogOpen) return;
+    _warningDialogOpen = true;
+    final result = await _showWarningDialog(context);
+    _warningDialogOpen = false;
+    if (result == true) {
+      await notifier.toggleAutoSave(true);
+    }
+  }
+
+  Future<bool?> _showWarningDialog(BuildContext context) async {
+    final t = Translations.of(context);
+    final notifier = context.read<DownloadNotifier>();
+    bool dontShowAgain = false;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(t.settings.auto_save_warning_title),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(t.settings.auto_save_warning_message),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Checkbox(
+                    value: dontShowAgain,
+                    onChanged: (v) =>
+                        setDialogState(() => dontShowAgain = v ?? false),
+                  ),
+                  Text(t.settings.auto_save_warning_dont_show_again),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(t.saved.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(t.settings.enable),
+            ),
+          ],
+        ),
+      ),
+    ).then((result) {
+      if (result == true && dontShowAgain) {
+        notifier.dismissAutoSaveWarning();
+      }
+      return result;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = Translations.of(context);
     final notifier = context.watch<DownloadNotifier>();
     return SwitchListTile(
       secondary: Icon(
-        notifier.autoSaveEnabled
-            ? Icons.save_alt_rounded
-            : Icons.save_outlined,
+        notifier.autoSaveEnabled ? Icons.save_alt_rounded : Icons.save_outlined,
       ),
       title: Text(t.settings.auto_save),
       subtitle: Text(
@@ -158,7 +229,7 @@ class _AutoSaveTile extends StatelessWidget {
             : t.settings.auto_save_inactive,
       ),
       value: notifier.autoSaveEnabled,
-      onChanged: (v) => notifier.toggleAutoSave(v),
+      onChanged: (v) => _onToggle(v, context),
     );
   }
 }

@@ -212,6 +212,12 @@ class Translations$saved$en {
 
 	/// en: 'Pictures/$dirName'
 	String header_path({required Object dirName}) => 'Pictures/${dirName}';
+
+	/// en: 'Select all'
+	String get select_all => 'Select all';
+
+	/// en: 'Deselect all'
+	String get deselect_all => 'Deselect all';
 }
 
 // Path: permission
@@ -371,6 +377,18 @@ class Translations$settings$en {
 
 	/// en: 'Version'
 	String get version => 'Version';
+
+	/// en: 'Enable'
+	String get enable => 'Enable';
+
+	/// en: 'Enable auto-save'
+	String get auto_save_warning_title => 'Enable auto-save';
+
+	/// en: 'When enabled, all currently visible statuses will be automatically saved to your device. The app will continuously monitor and save new statuses.'
+	String get auto_save_warning_message => 'When enabled, all currently visible statuses will be automatically saved to your device. The app will continuously monitor and save new statuses.';
+
+	/// en: 'Don't show again'
+	String get auto_save_warning_dont_show_again => 'Don\'t show again';
 }
 
 // Path: help
@@ -576,6 +594,8 @@ extension on Translations {
 			'saved.delete_selected_tooltip' => 'Delete selected',
 			'saved.file_count' => ({required Object count}) => '${count} file(s)',
 			'saved.header_path' => ({required Object dirName}) => 'Pictures/${dirName}',
+			'saved.select_all' => 'Select all',
+			'saved.deselect_all' => 'Deselect all',
 			'permission.title' => 'Storage Access Required',
 			'permission.description' => 'Statuses needs access to your storage to read WhatsApp status media files. Your files remain on your device.',
 			'permission.grant_access' => 'Grant Access',
@@ -617,6 +637,10 @@ extension on Translations {
 			'settings.app_name' => 'Statuses',
 			'settings.app_description' => 'View and manage WhatsApp story media files',
 			'settings.version' => 'Version',
+			'settings.enable' => 'Enable',
+			'settings.auto_save_warning_title' => 'Enable auto-save',
+			'settings.auto_save_warning_message' => 'When enabled, all currently visible statuses will be automatically saved to your device. The app will continuously monitor and save new statuses.',
+			'settings.auto_save_warning_dont_show_again' => 'Don\'t show again',
 			'help.title' => 'Help Center',
 			'help.how_to_use_title' => 'How to use',
 			'help.grant_permissions_title' => 'Grant permissions',

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'package:flutter/widgets.dart';
 import 'package:statuses/data/models/status_file.dart';
 import 'package:statuses/utils/file_utils.dart';
@@ -27,49 +28,68 @@ class StatusNotifier extends ChangeNotifier {
   ViewMode get viewMode => _viewMode;
   FilterMode get filterMode => _filterMode;
 
-  /// Statuses filtrados según el filtro activo (all/photo/video).
   List<StatusFile> get filteredStatuses {
-    switch (_filterMode) {
-      case FilterMode.all:
-        return _statuses;
-      case FilterMode.photo:
-        return _statuses.where((s) => s.mediaType == MediaType.image).toList();
-      case FilterMode.video:
-        return _statuses.where((s) => s.mediaType == MediaType.video).toList();
+    final sw = Stopwatch()..start();
+    final result = () {
+      switch (_filterMode) {
+        case FilterMode.all:
+          return _statuses;
+        case FilterMode.photo:
+          return _statuses.where((s) => s.mediaType == MediaType.image).toList();
+        case FilterMode.video:
+          return _statuses.where((s) => s.mediaType == MediaType.video).toList();
+      }
+    }();
+    sw.stop();
+    if (sw.elapsedMicroseconds > 200) {
+      debugPrint('[PERF] filteredStatuses getter: ${sw.elapsedMicroseconds}us');
     }
+    return result;
   }
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
-  /// True cuando el acceso directo por ruta falla y no hay permiso SAF previo.
-  /// En este caso la UI debe mostrar el botón "Seleccionar carpeta" (SAF).
   bool get needsSafFallback => _needsSafFallback;
 
   StatusNotifier(this._repository) {
+    final sw = Stopwatch()..start();
     _watcher = FileWatcherService();
+    debugPrint('[PERF] StatusNotifier constructor + FileWatcherService: ${sw.elapsedMilliseconds}ms');
   }
 
   Future<void> loadStatuses() async {
-    final sw = Stopwatch()..start();
+    final task = developer.TimelineTask();
+    task.start('loadStatuses');
+    final totalSw = Stopwatch()..start();
+
     _isLoading = true;
     _errorMessage = null;
+
+    final notifySw1 = Stopwatch()..start();
     notifyListeners();
+    notifySw1.stop();
+    debugPrint('[PERF] notifyListeners (isLoading=true): ${notifySw1.elapsedMicroseconds}us');
 
     try {
+      final loadSw = Stopwatch()..start();
       final allStatuses = await _repository.loadStatuses();
-      final loadTime = sw.elapsedMilliseconds;
+      final loadTime = loadSw.elapsedMilliseconds;
       final videoCount = allStatuses.where((s) => s.mediaType == MediaType.video).length;
       final imageCount = allStatuses.where((s) => s.mediaType == MediaType.image).length;
       debugPrint(
-        'StatusNotifier.loadStatuses: ${loadTime}ms, '
+        '[PERF] StatusNotifier.loadStatuses repository: ${loadTime}ms, '
         '${allStatuses.length} archivos '
         '($imageCount imágenes, $videoCount videos)',
       );
 
+      final safSw = Stopwatch()..start();
       _needsSafFallback =
           allStatuses.isEmpty && await _repository.needsSafFallback();
+      safSw.stop();
+      debugPrint('[PERF] needsSafFallback: ${safSw.elapsedMilliseconds}ms');
 
+      final watcherSw = Stopwatch()..start();
       _subscription?.cancel();
       _watcher.stop();
       _watcher.start();
@@ -82,17 +102,28 @@ class StatusNotifier extends ChangeNotifier {
           notifyListeners();
         }
       });
+      watcherSw.stop();
+      debugPrint('[PERF] FileWatcher setup: ${watcherSw.elapsedMilliseconds}ms');
 
       _isLoading = false;
       _statuses = allStatuses.length > 20
           ? allStatuses.take(20).toList()
           : allStatuses;
+
+      final notifySw2 = Stopwatch()..start();
       notifyListeners();
+      notifySw2.stop();
+      debugPrint('[PERF] notifyListeners (isLoading=false, ${_statuses.length} items): ${notifySw2.elapsedMicroseconds}us');
 
       if (allStatuses.length > 20) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          final batchSw = Stopwatch()..start();
           _statuses = allStatuses;
+          final notifySw3 = Stopwatch()..start();
           notifyListeners();
+          notifySw3.stop();
+          debugPrint('[PERF] notifyListeners (batch 2, ${_statuses.length} items): ${notifySw3.elapsedMicroseconds}us');
+          debugPrint('[PERF] batch 2 setStatuses + notify: ${batchSw.elapsedMilliseconds}ms');
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _precacheThumbnails();
           });
@@ -108,14 +139,11 @@ class StatusNotifier extends ChangeNotifier {
       notifyListeners();
     }
 
-    final loadTotal = sw.elapsedMilliseconds;
-    debugPrint('StatusNotifier.loadStatuses total: ${loadTotal}ms, '
-        '${_statuses.length} items iniciales, precache diferido');
+    final loadTotal = totalSw.elapsedMilliseconds;
+    debugPrint('[PERF] StatusNotifier.loadStatuses total: ${loadTotal}ms');
+    task.finish();
   }
 
-  /// Abre el selector de carpeta SAF del sistema.
-  /// Si el usuario selecciona una carpeta válida, recarga los estados.
-  /// Retorna true si se concedió acceso, false si el usuario canceló.
   Future<bool> grantSafPermission() async {
     final uri = await _repository.requestSafPermission();
     if (uri != null) {
@@ -148,9 +176,12 @@ class StatusNotifier extends ChangeNotifier {
       _statuses = await _repository.loadStatuses();
       _needsSafFallback =
           _statuses.isEmpty && await _repository.needsSafFallback();
+      final notifySw = Stopwatch()..start();
       notifyListeners();
+      notifySw.stop();
+      debugPrint('[PERF] refresh notifyListeners: ${notifySw.elapsedMicroseconds}us');
       final elapsed = sw.elapsedMilliseconds;
-      debugPrint('StatusNotifier.refresh: ${elapsed}ms, ${_statuses.length} items');
+      debugPrint('[PERF] StatusNotifier.refresh: ${elapsed}ms, ${_statuses.length} items');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _precacheThumbnails();
       });
@@ -161,18 +192,20 @@ class StatusNotifier extends ChangeNotifier {
   }
 
   void _precacheThumbnails() {
+    final sw = Stopwatch()..start();
     final allVideos = _statuses
         .where((s) => s.mediaType == MediaType.video)
         .map((s) => s.filePath)
         .toList();
     if (allVideos.isEmpty) return;
     final previewCount = allVideos.length > 30 ? 30 : allVideos.length;
-    debugPrint(
-      'StatusNotifier._precacheThumbnails: $previewCount de ${allVideos.length} '
-      'videos a precargar (concurrencia=3)',
-    );
     VideoThumbnailService.instance.resetStats();
     VideoThumbnailService.instance.precache(allVideos, concurrency: 3);
+    sw.stop();
+    debugPrint(
+      '[PERF] _precacheThumbnails lanzado: ${sw.elapsedMilliseconds}ms, '
+      '$previewCount de ${allVideos.length} videos',
+    );
   }
 
   @override

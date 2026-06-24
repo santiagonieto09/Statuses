@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:statuses/data/models/status_file.dart';
@@ -40,11 +41,14 @@ class StatusGridScreen extends StatelessWidget {
     final statuses = context.select<StatusNotifier, List<StatusFile>>(
       (n) => n.filteredStatuses,
     );
+    final gridTask = developer.TimelineTask();
+    gridTask.start('StatusGridScreen.build');
     if (!_gridBuildSw.isRunning) {
       _gridBuildSw.start();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _gridBuildSw.stop();
-        debugPrint('StatusGridScreen.build: ${_gridBuildSw.elapsedMilliseconds}ms para ${statuses.length} items');
+        debugPrint('[PERF] StatusGridScreen.build: ${_gridBuildSw.elapsedMilliseconds}ms para ${statuses.length} items');
+        gridTask.finish();
         _gridBuildSw.reset();
       });
     }

@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:statuses/data/models/status_file.dart';
@@ -27,11 +28,14 @@ class StatusListScreen extends StatelessWidget {
     final statuses = context.select<StatusNotifier, List<StatusFile>>(
       (n) => n.filteredStatuses,
     );
+    final listTask = developer.TimelineTask();
+    listTask.start('StatusListScreen.build');
     if (!_listBuildSw.isRunning) {
       _listBuildSw.start();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _listBuildSw.stop();
-        debugPrint('StatusListScreen.build: ${_listBuildSw.elapsedMilliseconds}ms para ${statuses.length} items');
+        debugPrint('[PERF] StatusListScreen.build: ${_listBuildSw.elapsedMilliseconds}ms para ${statuses.length} items');
+        listTask.finish();
         _listBuildSw.reset();
       });
     }

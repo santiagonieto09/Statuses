@@ -64,7 +64,7 @@ class VideoThumbnailService {
         if (bytes.isNotEmpty) {
           _diskHits++;
           _memoryCache[videoPath] = thumbFile.path;
-          debugPrint('VideoThumbnailService: miniatura en disco para $videoPath');
+          debugPrint('[PERF] VideoThumbnailService: miniatura en disco para $videoPath');
           return thumbFile.path;
         }
       }
@@ -80,7 +80,7 @@ class VideoThumbnailService {
 
       if (bytes == null || bytes.isEmpty) {
         _errors++;
-        debugPrint('VideoThumbnailService: sin datos para $videoPath');
+        debugPrint('[PERF] VideoThumbnailService: sin datos para $videoPath');
         return null;
       }
 
@@ -88,7 +88,7 @@ class VideoThumbnailService {
       _generated++;
       _memoryCache[videoPath] = thumbFile.path;
       debugPrint(
-        'VideoThumbnailService: generada miniatura para $videoPath '
+        '[PERF] VideoThumbnailService: generada miniatura para $videoPath '
         'en ${sw.elapsedMilliseconds}ms',
       );
       return thumbFile.path;

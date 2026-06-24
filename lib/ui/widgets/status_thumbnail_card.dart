@@ -28,12 +28,13 @@ class StatusThumbnailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final buildSw = Stopwatch()..start();
     final isSaved = showSavedIndicator
         ? context.select<DownloadNotifier, bool>(
             (n) => n.savedFilePaths.contains(status.fileName),
           )
         : false;
-    return RepaintBoundary(
+    final result = RepaintBoundary(
       child: GestureDetector(
         onTap: onTap,
         onLongPress: onLongPress,
@@ -100,6 +101,11 @@ class StatusThumbnailCard extends StatelessWidget {
         ),
       ),
     );
+    buildSw.stop();
+    if (buildSw.elapsedMicroseconds > 300) {
+      debugPrint('[PERF] StatusThumbnailCard.build (${status.mediaType.name}): ${buildSw.elapsedMicroseconds}us');
+    }
+    return result;
   }
 
   Widget _buildImage(BuildContext context) {
@@ -211,12 +217,13 @@ class StatusListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final buildSw = Stopwatch()..start();
     final isSaved = showSavedIndicator
         ? context.select<DownloadNotifier, bool>(
             (n) => n.savedFilePaths.contains(status.fileName),
           )
         : false;
-    return ListTile(
+    final result = ListTile(
       tileColor: isSelected ? Colors.green.withValues(alpha: 0.15) : null,
       onTap: onTap,
       onLongPress: onLongPress,
@@ -286,6 +293,11 @@ class StatusListItem extends StatelessWidget {
       ),
       trailing: _buildTrailingIcon(context),
     );
+    buildSw.stop();
+    if (buildSw.elapsedMicroseconds > 300) {
+      debugPrint('[PERF] StatusListItem.build (${status.mediaType.name}): ${buildSw.elapsedMicroseconds}us');
+    }
+    return result;
   }
 
   Widget _buildLeadingImage(BuildContext context) {

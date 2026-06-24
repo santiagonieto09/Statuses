@@ -75,7 +75,7 @@ class StatusRepository {
       final dirSw = Stopwatch()..start();
 
       try {
-        final entities = await dirEntity.list().toList();
+        final entities = await Directory(dir).list().toList();
         final listTime = dirSw.elapsedMilliseconds;
         int filesInDir = 0;
 
@@ -117,7 +117,7 @@ class StatusRepository {
     debugPrint('StatusRepository._loadFromDirectories: '
         'total=${totalSw.elapsedMilliseconds}ms, '
         'stat=${statTime}ms para ${statusFiles.length} archivos, '
-        'media=${statusFiles.length > 0 ? (statTime / statusFiles.length).toStringAsFixed(1) : "0"}ms/archivo');
+        'media=${statusFiles.isNotEmpty ? (statTime / statusFiles.length).toStringAsFixed(1) : "0"}ms/archivo');
     return statusFiles;
   }
 

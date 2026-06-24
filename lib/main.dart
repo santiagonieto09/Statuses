@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,9 +15,16 @@ import 'package:statuses/providers/theme_notifier.dart';
 final Stopwatch _appStartSw = Stopwatch()..start();
 
 void main() async {
+  final mainTask = developer.TimelineTask();
+  mainTask.start('AppStartup');
+
   runZonedGuarded(
     () {
-      WidgetsFlutterBinding.ensureInitialized();
+      developer.Timeline.timeSync('ensureInitialized', () {
+        WidgetsFlutterBinding.ensureInitialized();
+      });
+      final initTime = _appStartSw.elapsedMilliseconds;
+      debugPrint('[PERF] WidgetsFlutterBinding.ensureInitialized: ${initTime}ms');
 
       FlutterError.onError = (details) {
         FlutterError.presentError(details);
@@ -24,7 +32,7 @@ void main() async {
 
       SharedPreferences.getInstance().then((prefs) {
         final prefsTime = _appStartSw.elapsedMilliseconds;
-        debugPrint('main: SharedPreferences listas en ${prefsTime}ms');
+        debugPrint('[PERF] SharedPreferences.getInstance: ${prefsTime}ms');
         final saved = prefs.getString(LocaleNotifier.key);
         final initialLocale = saved != null
             ? AppLocale.values.firstWhere(
@@ -33,36 +41,64 @@ void main() async {
               )
             : AppLocale.es;
 
-        LocaleSettings.setLocaleSync(initialLocale);
+        developer.Timeline.timeSync('locale_set', () {
+          LocaleSettings.setLocaleSync(initialLocale);
+        });
 
-        runApp(
-          TranslationProvider(
-            child: MultiProvider(
-              providers: [
-                ChangeNotifierProvider(create: (_) => ThemeNotifier()),
-                ChangeNotifierProvider(
-                  create: (_) => LocaleNotifier(initialLocale: initialLocale),
-                ),
-                ChangeNotifierProvider(
-                  create: (_) => StatusNotifier(StatusRepository()),
-                ),
-                ChangeNotifierProvider(
-                  create: (ctx) {
-                    final notifier = DownloadNotifier();
-                    notifier.attachStatusNotifier(ctx.read<StatusNotifier>());
-                    return notifier;
-                  },
-                ),
-                ChangeNotifierProvider(
-                  create: (ctx) => NotificationNotifier(ctx.read<StatusNotifier>()),
-                ),
-              ],
-              child: const StatusesApp(),
+        developer.Timeline.timeSync('runApp', () {
+          runApp(
+            TranslationProvider(
+              child: MultiProvider(
+                providers: [
+                  ChangeNotifierProvider(create: (_) {
+                    final sw = Stopwatch()..start();
+                    final r = ThemeNotifier();
+                    debugPrint('[PERF] ThemeNotifier created: ${sw.elapsedMilliseconds}ms');
+                    return r;
+                  }),
+                  ChangeNotifierProvider(
+                    create: (_) {
+                      final sw = Stopwatch()..start();
+                      final r = LocaleNotifier(initialLocale: initialLocale);
+                      debugPrint('[PERF] LocaleNotifier created: ${sw.elapsedMilliseconds}ms');
+                      return r;
+                    },
+                  ),
+                  ChangeNotifierProvider(
+                    create: (_) {
+                      final sw = Stopwatch()..start();
+                      final r = StatusNotifier(StatusRepository());
+                      debugPrint('[PERF] StatusNotifier created: ${sw.elapsedMilliseconds}ms');
+                      return r;
+                    },
+                  ),
+                  ChangeNotifierProvider(
+                    create: (ctx) {
+                      final sw = Stopwatch()..start();
+                      final notifier = DownloadNotifier();
+                      notifier.attachStatusNotifier(ctx.read<StatusNotifier>());
+                      debugPrint('[PERF] DownloadNotifier created: ${sw.elapsedMilliseconds}ms');
+                      return notifier;
+                    },
+                  ),
+                  ChangeNotifierProvider(
+                    create: (ctx) {
+                      final sw = Stopwatch()..start();
+                      final r = NotificationNotifier(ctx.read<StatusNotifier>());
+                      debugPrint('[PERF] NotificationNotifier created: ${sw.elapsedMilliseconds}ms');
+                      return r;
+                    },
+                  ),
+                ],
+                child: const StatusesApp(),
+              ),
             ),
-          ),
-        );
+          );
+        });
+
         final runAppTime = _appStartSw.elapsedMilliseconds;
-        debugPrint('main: runApp completado en ${runAppTime}ms');
+        debugPrint('[PERF] main -> runApp completado en ${runAppTime}ms');
+        mainTask.finish();
       });
     },
     (error, stack) {

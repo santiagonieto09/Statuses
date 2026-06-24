@@ -142,7 +142,8 @@ void main() {
     test('hash 50 small files (sequential vs parallel)', () async {
       final files = List.generate(50, (i) {
         final f = File('${tempDir.path}/file_$i.jpg');
-        f.writeAsBytesSync(List.filled(1024, i));
+        final content = [i >> 8, i & 0xFF, ...List.filled(1022, 42)];
+        f.writeAsBytesSync(content);
         return f;
       });
 

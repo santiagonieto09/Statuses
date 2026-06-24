@@ -15,7 +15,6 @@ class StatusRepository {
   DateTime? _cacheTime;
   static const _cacheTtl = Duration(seconds: 2);
 
-  /// Descubre las rutas directas accesibles en el sistema de archivos.
   Future<List<String>> _discoverDirectories() async {
     final sw = Stopwatch()..start();
     final results = await Future.wait(
@@ -25,14 +24,11 @@ class StatusRepository {
       }),
     );
     final dirs = results.where((r) => r.exists).map((r) => r.path).toList();
-    debugPrint('StatusRepository._discoverDirectories: ${sw.elapsedMilliseconds}ms, '
+    debugPrint('[PERF] StatusRepository._discoverDirectories: ${sw.elapsedMilliseconds}ms, '
         '${dirs.length} dirs encontrados de ${AppConstants.whatsappStatusPaths.length}');
     return dirs;
   }
 
-  /// Carga los estados disponibles.
-  /// Primero intenta acceso directo por ruta; si no encuentra ningún
-  /// directorio válido, usa el fallback SAF (si el usuario ya concedió acceso).
   Future<List<StatusFile>> loadStatuses() async {
     final sw = Stopwatch()..start();
 
@@ -45,39 +41,39 @@ class StatusRepository {
     final dirs = await _discoverDirectories();
 
     if (dirs.isNotEmpty) {
-      final result = await _loadFromDirectories(dirs);
-      debugPrint('StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (direct, ${result.length} files)');
+      final result = _loadFromDirectories(dirs);
+      debugPrint('[PERF] StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (direct, ${result.length} files)');
       _metadataCache = result;
       _cacheTime = DateTime.now();
       return result;
     }
 
-    // Fallback: Storage Access Framework
     final safUri = await _safService.getGrantedUri();
     if (safUri != null) {
       final result = await _safService.loadStatuses(safUri);
-      debugPrint('StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (SAF, ${result.length} files)');
+      debugPrint('[PERF] StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (SAF, ${result.length} files)');
       _metadataCache = result;
       _cacheTime = DateTime.now();
       return result;
     }
 
-    debugPrint('StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (no directories found)');
+    debugPrint('[PERF] StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (no directories found)');
     return [];
   }
 
-  Future<List<StatusFile>> _loadFromDirectories(List<String> dirs) async {
+  List<StatusFile> _loadFromDirectories(List<String> dirs) {
     final totalSw = Stopwatch()..start();
     final seenNames = <String>{};
-    final allFiles = <_FileEntry>[];
+    final statusFiles = <StatusFile>[];
+    int statCount = 0;
 
-    for (final dir in dirs) {
+    for (final dirPath in dirs) {
       final dirSw = Stopwatch()..start();
+      int filesInDir = 0;
 
       try {
-        final entities = await Directory(dir).list().toList();
+        final entities = Directory(dirPath).listSync(followLinks: false);
         final listTime = dirSw.elapsedMilliseconds;
-        int filesInDir = 0;
 
         for (final entity in entities) {
           if (entity is! File) continue;
@@ -91,49 +87,36 @@ class StatusRepository {
             continue;
           }
 
-          allFiles.add(_FileEntry(
-            file: entity,
-            name: name,
-            ext: ext,
+          final stat = entity.statSync();
+          statCount++;
+
+          statusFiles.add(StatusFile(
+            filePath: entity.path,
+            fileName: name,
+            extension: ext,
+            fileSize: stat.size,
+            lastModified: stat.modified,
             mediaType: mediaType,
           ));
           filesInDir++;
         }
 
-        debugPrint('StatusRepository._loadFromDirectories: dir=$dir '
-            'list=${listTime}ms, files=$filesInDir');
+        debugPrint('[PERF] StatusRepository._loadFromDirectories: dir=$dirPath '
+            'listSync=${listTime}ms, files=$filesInDir');
       } catch (e) {
-        debugPrint('StatusRepository._loadFromDirectories: error en $dir: $e');
+        debugPrint('[PERF] StatusRepository._loadFromDirectories: error en $dirPath: $e');
       }
     }
 
-    final statSw = Stopwatch()..start();
-    final statusFiles = await Future.wait(
-      allFiles.map((e) => _buildStatusFile(e)),
-    );
-    final statTime = statSw.elapsedMilliseconds;
-
     statusFiles.sort((a, b) => b.lastModified.compareTo(a.lastModified));
-    debugPrint('StatusRepository._loadFromDirectories: '
-        'total=${totalSw.elapsedMilliseconds}ms, '
-        'stat=${statTime}ms para ${statusFiles.length} archivos, '
-        'media=${statusFiles.isNotEmpty ? (statTime / statusFiles.length).toStringAsFixed(1) : "0"}ms/archivo');
+    final total = totalSw.elapsedMilliseconds;
+    debugPrint('[PERF] StatusRepository._loadFromDirectories: '
+        'total=$total ms, '
+        'statSync=$statCount archivos, '
+        'media=${statusFiles.isNotEmpty ? (total / statusFiles.length).toStringAsFixed(1) : "0"}ms/archivo');
     return statusFiles;
   }
 
-  Future<StatusFile> _buildStatusFile(_FileEntry entry) async {
-    final stat = await entry.file.stat();
-    return StatusFile(
-      filePath: entry.file.path,
-      fileName: entry.name,
-      extension: entry.ext,
-      fileSize: stat.size,
-      lastModified: stat.modified,
-      mediaType: entry.mediaType,
-    );
-  }
-
-  /// Retorna true si hay algún directorio accesible (directo o vía SAF).
   Future<bool> hasStatusDirectory() async {
     final dirs = await _discoverDirectories();
     if (dirs.isNotEmpty) return true;
@@ -141,8 +124,6 @@ class StatusRepository {
     return safUri != null;
   }
 
-  /// Indica si el acceso directo falla Y tampoco hay permiso SAF concedido,
-  /// es decir, si se debe mostrar al usuario la opción de conceder acceso SAF.
   Future<bool> needsSafFallback() async {
     final dirs = await _discoverDirectories();
     if (dirs.isNotEmpty) return false;
@@ -150,27 +131,11 @@ class StatusRepository {
     return safUri == null;
   }
 
-  /// Solicita al usuario que seleccione la carpeta .Statuses mediante SAF.
   Future<Uri?> requestSafPermission() => _safService.requestPermission();
 
-  /// Copia un archivo de estado al directorio de destino.
   Future<void> copyToDirectory(StatusFile status, String destDir) async {
     final destFile = File('$destDir/${status.fileName}');
     final sourceFile = File(status.filePath);
     await sourceFile.copy(destFile.path);
   }
-}
-
-class _FileEntry {
-  final File file;
-  final String name;
-  final String ext;
-  final MediaType mediaType;
-
-  const _FileEntry({
-    required this.file,
-    required this.name,
-    required this.ext,
-    required this.mediaType,
-  });
 }

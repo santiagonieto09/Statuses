@@ -88,9 +88,11 @@ class StatusNotifier extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
-    final elapsed = sw.elapsedMilliseconds;
-    _precacheThumbnails();
-    debugPrint('StatusNotifier.loadStatuses total: ${elapsed}ms (incluye precache)');
+    final loadTotal = sw.elapsedMilliseconds;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _precacheThumbnails();
+    });
+    debugPrint('StatusNotifier.loadStatuses total: ${loadTotal}ms, precache diferido');
   }
 
   /// Abre el selector de carpeta SAF del sistema.
@@ -130,7 +132,9 @@ class StatusNotifier extends ChangeNotifier {
           _statuses.isEmpty && await _repository.needsSafFallback();
       notifyListeners();
       final elapsed = sw.elapsedMilliseconds;
-      _precacheThumbnails();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _precacheThumbnails();
+      });
       debugPrint('StatusNotifier.refresh: ${elapsed}ms');
     } catch (e) {
       _errorMessage = 'Refresh failed: $e';

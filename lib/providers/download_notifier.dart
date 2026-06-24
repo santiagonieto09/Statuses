@@ -111,24 +111,26 @@ class DownloadNotifier extends ChangeNotifier {
     if (_statusNotifier == null) return;
     final statuses = _statusNotifier!.filteredStatuses;
     await _loadSaved();
-    for (int i = 0; i < statuses.length; i++) {
-      final status = statuses[i];
-      if (_processingPaths.contains(status.filePath)) continue;
-      if (_processedSourcePaths.contains(status.filePath)) continue;
-      if (_cachedSavedFilePaths.contains(status.fileName)) continue;
-      final alreadySaved = await _isAlreadySavedByHash(status);
-      if (alreadySaved) {
-        _processedSourcePaths.add(status.filePath);
-        continue;
-      }
-      _processingPaths.add(status.filePath);
-      try {
-        await _service.downloadStatus(status);
-        _processedSourcePaths.add(status.filePath);
-      } finally {
-        _processingPaths.remove(status.filePath);
-      }
-      if (i % 5 == 0) await Future.delayed(Duration.zero);
+    const batchSize = 5;
+    for (int i = 0; i < statuses.length; i += batchSize) {
+      final batch = statuses.skip(i).take(batchSize).toList();
+      await Future.wait(batch.map((status) async {
+        if (_processingPaths.contains(status.filePath)) return;
+        if (_processedSourcePaths.contains(status.filePath)) return;
+        if (_cachedSavedFilePaths.contains(status.fileName)) return;
+        final alreadySaved = await _isAlreadySavedByHash(status);
+        if (alreadySaved) {
+          _processedSourcePaths.add(status.filePath);
+          return;
+        }
+        _processingPaths.add(status.filePath);
+        try {
+          await _service.downloadStatus(status);
+          _processedSourcePaths.add(status.filePath);
+        } finally {
+          _processingPaths.remove(status.filePath);
+        }
+      }));
     }
   }
 
@@ -167,22 +169,27 @@ class DownloadNotifier extends ChangeNotifier {
   Future<void> _checkAutoSave() async {
     if (!_autoSaveEnabled || _statusNotifier == null || _isSyncing) return;
     await _loadSaved();
-    for (final status in _statusNotifier!.filteredStatuses) {
-      if (_processingPaths.contains(status.filePath)) continue;
-      if (_processedSourcePaths.contains(status.filePath)) continue;
-      if (_cachedSavedFilePaths.contains(status.fileName)) continue;
-      final alreadySaved = await _isAlreadySavedByHash(status);
-      if (alreadySaved) {
-        _processedSourcePaths.add(status.filePath);
-        continue;
-      }
-      _processingPaths.add(status.filePath);
-      try {
-        await _service.downloadStatus(status);
-        _processedSourcePaths.add(status.filePath);
-      } finally {
-        _processingPaths.remove(status.filePath);
-      }
+    const batchSize = 5;
+    final statuses = _statusNotifier!.filteredStatuses;
+    for (int i = 0; i < statuses.length; i += batchSize) {
+      final batch = statuses.skip(i).take(batchSize).toList();
+      await Future.wait(batch.map((status) async {
+        if (_processingPaths.contains(status.filePath)) return;
+        if (_processedSourcePaths.contains(status.filePath)) return;
+        if (_cachedSavedFilePaths.contains(status.fileName)) return;
+        final alreadySaved = await _isAlreadySavedByHash(status);
+        if (alreadySaved) {
+          _processedSourcePaths.add(status.filePath);
+          return;
+        }
+        _processingPaths.add(status.filePath);
+        try {
+          await _service.downloadStatus(status);
+          _processedSourcePaths.add(status.filePath);
+        } finally {
+          _processingPaths.remove(status.filePath);
+        }
+      }));
     }
     await _loadSaved();
     await _updateStorageInfo();

@@ -20,6 +20,7 @@ class DownloadNotifier extends ChangeNotifier {
 
   List<StatusFile> _savedStatuses = [];
   Set<String> _cachedSavedFilePaths = {};
+  final Set<String> _savedHashes = {};
   final Map<String, String> _hashCache = {};
   bool _isSavedLoading = false;
 
@@ -133,11 +134,7 @@ class DownloadNotifier extends ChangeNotifier {
 
   Future<bool> _isAlreadySavedByHash(StatusFile status) async {
     final sourceHash = await _getOrComputeHash(status.filePath);
-    for (final saved in _savedStatuses) {
-      final savedHash = await _getOrComputeHash(saved.filePath);
-      if (savedHash == sourceHash) return true;
-    }
-    return false;
+    return _savedHashes.contains(sourceHash);
   }
 
   Future<String> _getOrComputeHash(String filePath) async {
@@ -249,9 +246,14 @@ class DownloadNotifier extends ChangeNotifier {
     try {
       _savedStatuses = await _service.getSavedStatuses();
       _cachedSavedFilePaths = _savedStatuses.map((s) => s.fileName).toSet();
+      _savedHashes.clear();
+      for (final saved in _savedStatuses) {
+        _savedHashes.add(await _getOrComputeHash(saved.filePath));
+      }
     } catch (e) {
       _savedStatuses = [];
       _cachedSavedFilePaths = {};
+      _savedHashes.clear();
     }
   }
 
@@ -282,6 +284,7 @@ class DownloadNotifier extends ChangeNotifier {
         final file = File(path);
         if (await file.exists()) await file.delete();
       } catch (_) {}
+      _hashCache.remove(path);
     }
     await _loadSaved();
     await _updateStorageInfo();

@@ -15,6 +15,7 @@ class FileWatcherService {
   FileWatcherService();
 
   void start() {
+    if (Platform.environment['FLUTTER_TEST'] == 'true') return;
     _tryStartNativeWatcher();
     _startPollingFallback();
   }

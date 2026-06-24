@@ -89,22 +89,6 @@ class StatusNotifier extends ChangeNotifier {
       safSw.stop();
       debugPrint('[PERF] needsSafFallback: ${safSw.elapsedMilliseconds}ms');
 
-      final watcherSw = Stopwatch()..start();
-      _subscription?.cancel();
-      _watcher.stop();
-      _watcher.start();
-      _subscription = _watcher.changes.listen((_) async {
-        try {
-          _statuses = await _repository.loadStatuses();
-          notifyListeners();
-        } catch (e) {
-          _errorMessage = 'Watcher error: $e';
-          notifyListeners();
-        }
-      });
-      watcherSw.stop();
-      debugPrint('[PERF] FileWatcher setup: ${watcherSw.elapsedMilliseconds}ms');
-
       _isLoading = false;
       _statuses = allStatuses.length > 20
           ? allStatuses.take(20).toList()
@@ -115,8 +99,10 @@ class StatusNotifier extends ChangeNotifier {
       notifySw2.stop();
       debugPrint('[PERF] notifyListeners (isLoading=false, ${_statuses.length} items): ${notifySw2.elapsedMicroseconds}us');
 
-      if (allStatuses.length > 20) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _startFileWatcher();
+
+        if (allStatuses.length > 20) {
           final batchSw = Stopwatch()..start();
           _statuses = allStatuses;
           final notifySw3 = Stopwatch()..start();
@@ -127,12 +113,10 @@ class StatusNotifier extends ChangeNotifier {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _precacheThumbnails();
           });
-        });
-      } else {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        } else {
           _precacheThumbnails();
-        });
-      }
+        }
+      });
     } catch (e) {
       _errorMessage = 'Failed to load statuses: $e';
       _isLoading = false;
@@ -142,6 +126,24 @@ class StatusNotifier extends ChangeNotifier {
     final loadTotal = totalSw.elapsedMilliseconds;
     debugPrint('[PERF] StatusNotifier.loadStatuses total: ${loadTotal}ms');
     task.finish();
+  }
+
+  void _startFileWatcher() {
+    final watcherSw = Stopwatch()..start();
+    _subscription?.cancel();
+    _watcher.stop();
+    _watcher.start();
+    _subscription = _watcher.changes.listen((_) async {
+      try {
+        _statuses = await _repository.loadStatuses();
+        notifyListeners();
+      } catch (e) {
+        _errorMessage = 'Watcher error: $e';
+        notifyListeners();
+      }
+    });
+    watcherSw.stop();
+    debugPrint('[PERF] FileWatcher deferred start: ${watcherSw.elapsedMilliseconds}ms');
   }
 
   Future<bool> grantSafPermission() async {

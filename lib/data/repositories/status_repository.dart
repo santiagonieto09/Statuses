@@ -17,13 +17,16 @@ class StatusRepository {
 
   /// Descubre las rutas directas accesibles en el sistema de archivos.
   Future<List<String>> _discoverDirectories() async {
-    final dirs = <String>[];
-    for (final path in AppConstants.whatsappStatusPaths) {
-      final dir = Directory(path);
-      if (await dir.exists()) {
-        dirs.add(path);
-      }
-    }
+    final sw = Stopwatch()..start();
+    final results = await Future.wait(
+      AppConstants.whatsappStatusPaths.map((path) async {
+        final exists = await Directory(path).exists();
+        return (path: path, exists: exists);
+      }),
+    );
+    final dirs = results.where((r) => r.exists).map((r) => r.path).toList();
+    debugPrint('StatusRepository._discoverDirectories: ${sw.elapsedMilliseconds}ms, '
+        '${dirs.length} dirs encontrados de ${AppConstants.whatsappStatusPaths.length}');
     return dirs;
   }
 
@@ -64,42 +67,57 @@ class StatusRepository {
   }
 
   Future<List<StatusFile>> _loadFromDirectories(List<String> dirs) async {
-    final sw = Stopwatch()..start();
+    final totalSw = Stopwatch()..start();
     final seenNames = <String>{};
     final allFiles = <_FileEntry>[];
 
     for (final dir in dirs) {
-      final dirEntity = Directory(dir);
-      if (!await dirEntity.exists()) continue;
+      final dirSw = Stopwatch()..start();
 
-      final entities = await dirEntity.list().toList();
-      for (final entity in entities) {
-        if (entity is! File) continue;
-        final name = entity.uri.pathSegments.last;
-        if (!seenNames.add(name.toLowerCase())) continue;
+      try {
+        final entities = await dirEntity.list().toList();
+        final listTime = dirSw.elapsedMilliseconds;
+        int filesInDir = 0;
 
-        final ext =
-            name.contains('.') ? '.${name.split('.').last.toLowerCase()}' : '';
-        final mediaType = FileUtils.detectMediaType(ext);
-        if (mediaType != MediaType.image && mediaType != MediaType.video) {
-          continue;
+        for (final entity in entities) {
+          if (entity is! File) continue;
+          final name = entity.uri.pathSegments.last;
+          if (!seenNames.add(name.toLowerCase())) continue;
+
+          final ext =
+              name.contains('.') ? '.${name.split('.').last.toLowerCase()}' : '';
+          final mediaType = FileUtils.detectMediaType(ext);
+          if (mediaType != MediaType.image && mediaType != MediaType.video) {
+            continue;
+          }
+
+          allFiles.add(_FileEntry(
+            file: entity,
+            name: name,
+            ext: ext,
+            mediaType: mediaType,
+          ));
+          filesInDir++;
         }
 
-        allFiles.add(_FileEntry(
-          file: entity,
-          name: name,
-          ext: ext,
-          mediaType: mediaType,
-        ));
+        debugPrint('StatusRepository._loadFromDirectories: dir=$dir '
+            'list=${listTime}ms, files=$filesInDir');
+      } catch (e) {
+        debugPrint('StatusRepository._loadFromDirectories: error en $dir: $e');
       }
     }
 
+    final statSw = Stopwatch()..start();
     final statusFiles = await Future.wait(
       allFiles.map((e) => _buildStatusFile(e)),
     );
+    final statTime = statSw.elapsedMilliseconds;
 
     statusFiles.sort((a, b) => b.lastModified.compareTo(a.lastModified));
-    debugPrint('StatusRepository._loadFromDirectories: ${sw.elapsedMilliseconds}ms for ${statusFiles.length} files');
+    debugPrint('StatusRepository._loadFromDirectories: '
+        'total=${totalSw.elapsedMilliseconds}ms, '
+        'stat=${statTime}ms para ${statusFiles.length} archivos, '
+        'media=${statusFiles.length > 0 ? (statTime / statusFiles.length).toStringAsFixed(1) : "0"}ms/archivo');
     return statusFiles;
   }
 

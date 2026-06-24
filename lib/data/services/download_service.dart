@@ -83,12 +83,13 @@ class DownloadService {
       final mediaType = FileUtils.detectMediaType(ext);
       if (mediaType == MediaType.unknown) continue;
 
+      final stat = file.statSync();
       files.add(StatusFile(
         filePath: file.path,
         fileName: name,
         extension: ext,
-        fileSize: file.lengthSync(),
-        lastModified: file.lastModifiedSync(),
+        fileSize: stat.size,
+        lastModified: stat.modified,
         mediaType: mediaType,
       ));
     }
@@ -135,12 +136,13 @@ class DownloadService {
       final mediaType = FileUtils.detectMediaType(ext);
       if (mediaType == MediaType.unknown) continue;
 
+      final stat = await file.stat();
       files.add(StatusFile(
         filePath: file.path,
         fileName: name,
         extension: ext,
-        fileSize: await file.length(),
-        lastModified: await file.lastModified(),
+        fileSize: stat.size,
+        lastModified: stat.modified,
         mediaType: mediaType,
       ));
     }

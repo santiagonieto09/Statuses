@@ -90,12 +90,13 @@ class StatusRepository {
   }
 
   Future<StatusFile> _buildStatusFile(_FileEntry entry) async {
+    final stat = await entry.file.stat();
     return StatusFile(
       filePath: entry.file.path,
       fileName: entry.name,
       extension: entry.ext,
-      fileSize: await entry.file.length(),
-      lastModified: await entry.file.lastModified(),
+      fileSize: stat.size,
+      lastModified: stat.modified,
       mediaType: entry.mediaType,
     );
   }

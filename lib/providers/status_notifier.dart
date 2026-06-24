@@ -57,18 +57,18 @@ class StatusNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _statuses = await _repository.loadStatuses();
+      final allStatuses = await _repository.loadStatuses();
       final loadTime = sw.elapsedMilliseconds;
-      final videoCount = _statuses.where((s) => s.mediaType == MediaType.video).length;
-      final imageCount = _statuses.where((s) => s.mediaType == MediaType.image).length;
+      final videoCount = allStatuses.where((s) => s.mediaType == MediaType.video).length;
+      final imageCount = allStatuses.where((s) => s.mediaType == MediaType.image).length;
       debugPrint(
         'StatusNotifier.loadStatuses: ${loadTime}ms, '
-        '${_statuses.length} archivos '
+        '${allStatuses.length} archivos '
         '($imageCount imágenes, $videoCount videos)',
       );
 
       _needsSafFallback =
-          _statuses.isEmpty && await _repository.needsSafFallback();
+          allStatuses.isEmpty && await _repository.needsSafFallback();
 
       _subscription?.cancel();
       _watcher.stop();
@@ -82,17 +82,35 @@ class StatusNotifier extends ChangeNotifier {
           notifyListeners();
         }
       });
+
+      _isLoading = false;
+      _statuses = allStatuses.length > 20
+          ? allStatuses.take(20).toList()
+          : allStatuses;
+      notifyListeners();
+
+      if (allStatuses.length > 20) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _statuses = allStatuses;
+          notifyListeners();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _precacheThumbnails();
+          });
+        });
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _precacheThumbnails();
+        });
+      }
     } catch (e) {
       _errorMessage = 'Failed to load statuses: $e';
+      _isLoading = false;
+      notifyListeners();
     }
 
-    _isLoading = false;
-    notifyListeners();
     final loadTotal = sw.elapsedMilliseconds;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _precacheThumbnails();
-    });
-    debugPrint('StatusNotifier.loadStatuses total: ${loadTotal}ms, precache diferido');
+    debugPrint('StatusNotifier.loadStatuses total: ${loadTotal}ms, '
+        '${_statuses.length} items iniciales, precache diferido');
   }
 
   /// Abre el selector de carpeta SAF del sistema.
@@ -132,10 +150,10 @@ class StatusNotifier extends ChangeNotifier {
           _statuses.isEmpty && await _repository.needsSafFallback();
       notifyListeners();
       final elapsed = sw.elapsedMilliseconds;
+      debugPrint('StatusNotifier.refresh: ${elapsed}ms, ${_statuses.length} items');
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _precacheThumbnails();
       });
-      debugPrint('StatusNotifier.refresh: ${elapsed}ms');
     } catch (e) {
       _errorMessage = 'Refresh failed: $e';
       notifyListeners();

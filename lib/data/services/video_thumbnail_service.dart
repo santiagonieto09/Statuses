@@ -10,17 +10,43 @@ class VideoThumbnailService {
   VideoThumbnailService._();
 
   static const _cacheDir = 'video_thumbnails';
-  static const _fallbackDir = 'video_thumbnails_fallback';
 
+  final Map<String, String?> _memoryCache = {};
   final Map<String, Future<String?>> _pending = {};
 
-  Future<String?> getThumbnail(String videoPath) {
-    return _pending[videoPath] ??= _generate(videoPath);
+  int _cacheHits = 0;
+  int _generated = 0;
+  int _errors = 0;
+  int _diskHits = 0;
+
+  Future<String?> getThumbnail(String videoPath) async {
+    if (_memoryCache.containsKey(videoPath)) {
+      _cacheHits++;
+      return _memoryCache[videoPath];
+    }
+    if (_pending.containsKey(videoPath)) {
+      return _pending[videoPath];
+    }
+    final future = _generate(videoPath);
+    _pending[videoPath] = future;
+    return future;
   }
 
-  void precache(List<String> videoPaths) {
-    for (final path in videoPaths) {
-      getThumbnail(path);
+  void precache(List<String> videoPaths, {int concurrency = 3}) {
+    int index = 0;
+    void processNext() {
+      if (index >= videoPaths.length) {
+        printStats();
+        return;
+      }
+      final path = videoPaths[index++];
+      getThumbnail(path).then((_) => processNext());
+    }
+    final count = concurrency < videoPaths.length
+        ? concurrency
+        : videoPaths.length;
+    for (int i = 0; i < count; i++) {
+      processNext();
     }
   }
 
@@ -33,71 +59,60 @@ class VideoThumbnailService {
       final name = '${p.basenameWithoutExtension(videoPath)}.jpg';
       final thumbFile = File('${dir.path}/$name');
 
-      if (thumbFile.existsSync()) return thumbFile.path;
-
-      var bytes = await compute(_generateThumbnail, videoPath);
-
-      if (bytes == null || bytes.isEmpty) {
-        bytes = await _generateWithFallback(videoPath);
+      if (thumbFile.existsSync()) {
+        final bytes = await thumbFile.readAsBytes();
+        if (bytes.isNotEmpty) {
+          _diskHits++;
+          _memoryCache[videoPath] = thumbFile.path;
+          debugPrint('VideoThumbnailService: miniatura en disco para $videoPath');
+          return thumbFile.path;
+        }
       }
 
-      if (bytes == null || bytes.isEmpty) {
-        _pending.remove(videoPath);
-        debugPrint('VideoThumbnailService: no se pudo generar thumbnail para $videoPath');
-        return null;
-      }
-
-      await thumbFile.writeAsBytes(bytes);
-      return thumbFile.path;
-    } catch (e, st) {
-      _pending.remove(videoPath);
-      debugPrint('VideoThumbnailService: error al generar thumbnail para $videoPath: $e\n$st');
-      return null;
-    }
-  }
-
-  Future<Uint8List?> _generateWithFallback(String videoPath) async {
-    try {
-      final base = await getTemporaryDirectory();
-      final fallbackDir = Directory('${base.path}/$_fallbackDir');
-      if (!fallbackDir.existsSync()) fallbackDir.createSync(recursive: true);
-
-      final sourceFile = File(videoPath);
-      if (!sourceFile.existsSync()) return null;
-
-      final tempVideo = File(
-        '${fallbackDir.path}/${p.basename(videoPath)}',
-      );
-
-      await sourceFile.copy(tempVideo.path);
-
+      final sw = Stopwatch()..start();
       final bytes = await VideoThumbnail.thumbnailData(
-        video: tempVideo.path,
+        video: videoPath,
         imageFormat: ImageFormat.JPEG,
         maxWidth: 300,
         quality: 75,
       );
+      sw.stop();
 
-      tempVideo.deleteSync();
+      if (bytes == null || bytes.isEmpty) {
+        _errors++;
+        debugPrint('VideoThumbnailService: sin datos para $videoPath');
+        return null;
+      }
 
-      return bytes;
+      await thumbFile.writeAsBytes(bytes);
+      _generated++;
+      _memoryCache[videoPath] = thumbFile.path;
+      debugPrint(
+        'VideoThumbnailService: generada miniatura para $videoPath '
+        'en ${sw.elapsedMilliseconds}ms',
+      );
+      return thumbFile.path;
     } catch (e, st) {
-      debugPrint('VideoThumbnailService: fallback falló para $videoPath: $e\n$st');
+      _errors++;
+      debugPrint('VideoThumbnailService: error para $videoPath: $e\n$st');
       return null;
     }
   }
-}
 
-Future<Uint8List?> _generateThumbnail(String videoPath) async {
-  try {
-    return await VideoThumbnail.thumbnailData(
-      video: videoPath,
-      imageFormat: ImageFormat.JPEG,
-      maxWidth: 300,
-      quality: 75,
+  void printStats() {
+    debugPrint(
+      'VideoThumbnailService stats: '
+      'cacheHits=$_cacheHits, '
+      'diskHits=$_diskHits, '
+      'generated=$_generated, '
+      'errors=$_errors',
     );
-  } catch (e) {
-    debugPrint('VideoThumbnailService isolate: error $e');
-    return null;
+  }
+
+  void resetStats() {
+    _cacheHits = 0;
+    _diskHits = 0;
+    _generated = 0;
+    _errors = 0;
   }
 }

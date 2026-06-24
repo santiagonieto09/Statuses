@@ -58,7 +58,15 @@ class StatusNotifier extends ChangeNotifier {
 
     try {
       _statuses = await _repository.loadStatuses();
-      debugPrint('StatusNotifier.loadStatuses: ${sw.elapsedMilliseconds}ms, ${_statuses.length} files');
+      final loadTime = sw.elapsedMilliseconds;
+      final videoCount = _statuses.where((s) => s.mediaType == MediaType.video).length;
+      final imageCount = _statuses.where((s) => s.mediaType == MediaType.image).length;
+      debugPrint(
+        'StatusNotifier.loadStatuses: ${loadTime}ms, '
+        '${_statuses.length} archivos '
+        '($imageCount imágenes, $videoCount videos)',
+      );
+
       _needsSafFallback =
           _statuses.isEmpty && await _repository.needsSafFallback();
 
@@ -80,7 +88,9 @@ class StatusNotifier extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+    final elapsed = sw.elapsedMilliseconds;
     _precacheThumbnails();
+    debugPrint('StatusNotifier.loadStatuses total: ${elapsed}ms (incluye precache)');
   }
 
   /// Abre el selector de carpeta SAF del sistema.
@@ -113,12 +123,15 @@ class StatusNotifier extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
+    final sw = Stopwatch()..start();
     try {
       _statuses = await _repository.loadStatuses();
       _needsSafFallback =
           _statuses.isEmpty && await _repository.needsSafFallback();
       notifyListeners();
+      final elapsed = sw.elapsedMilliseconds;
       _precacheThumbnails();
+      debugPrint('StatusNotifier.refresh: ${elapsed}ms');
     } catch (e) {
       _errorMessage = 'Refresh failed: $e';
       notifyListeners();
@@ -126,14 +139,18 @@ class StatusNotifier extends ChangeNotifier {
   }
 
   void _precacheThumbnails() {
-    final videos = _statuses
+    final allVideos = _statuses
         .where((s) => s.mediaType == MediaType.video)
-        .take(30)
         .map((s) => s.filePath)
         .toList();
-    if (videos.isNotEmpty) {
-      VideoThumbnailService.instance.precache(videos);
-    }
+    if (allVideos.isEmpty) return;
+    final previewCount = allVideos.length > 30 ? 30 : allVideos.length;
+    debugPrint(
+      'StatusNotifier._precacheThumbnails: $previewCount de ${allVideos.length} '
+      'videos a precargar (concurrencia=3)',
+    );
+    VideoThumbnailService.instance.resetStats();
+    VideoThumbnailService.instance.precache(allVideos, concurrency: 3);
   }
 
   @override

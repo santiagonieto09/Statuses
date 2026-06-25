@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:statuses/app.dart';
 import 'package:statuses/data/repositories/status_repository.dart';
+import 'package:statuses/data/services/permission_service.dart';
 import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/download_notifier.dart';
 import 'package:statuses/providers/locale_notifier.dart';
@@ -33,6 +34,9 @@ void main() async {
       SharedPreferences.getInstance().then((prefs) {
         final prefsTime = _appStartSw.elapsedMilliseconds;
         debugPrint('[PERF] SharedPreferences.getInstance: ${prefsTime}ms');
+
+        unawaited(androidSdkVersion);
+
         final saved = prefs.getString(LocaleNotifier.key);
         final initialLocale = saved != null
             ? AppLocale.values.firstWhere(

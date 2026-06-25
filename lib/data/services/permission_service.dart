@@ -1,24 +1,32 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
 enum PermissionState { granted, denied, permanentlyDenied }
 
 int? _cachedSdkVersion;
+DeviceInfoPlugin? _deviceInfo;
 
-int _parseAndroidSdkVersion() {
-  // Platform.operatingSystemVersion returns "Android 14 (API 34)" on Android
-  final match = RegExp(r'API (\d+)').firstMatch(Platform.operatingSystemVersion);
-  if (match != null) return int.parse(match.group(1)!);
-  return 0;
-}
-
-int get androidSdkVersion {
+Future<int> get androidSdkVersion async {
   if (!Platform.isAndroid) return 0;
   if (_cachedSdkVersion != null) return _cachedSdkVersion!;
+
+  final prefs = await SharedPreferences.getInstance();
+  _cachedSdkVersion = prefs.getInt('cached_android_sdk_version');
+  if (_cachedSdkVersion != null) {
+    debugPrint('[PERF] androidSdkVersion (SharedPreferences): SDK $_cachedSdkVersion');
+    return _cachedSdkVersion!;
+  }
+
   final sw = Stopwatch()..start();
-  _cachedSdkVersion = _parseAndroidSdkVersion();
-  debugPrint('[PERF] androidSdkVersion (sync, Platform.operatingSystemVersion): ${sw.elapsedMicroseconds}us -> SDK $_cachedSdkVersion');
+  _deviceInfo ??= DeviceInfoPlugin();
+  final androidInfo = await _deviceInfo!.androidInfo;
+  _cachedSdkVersion = androidInfo.version.sdkInt;
+  unawaited(prefs.setInt('cached_android_sdk_version', _cachedSdkVersion!));
+  debugPrint('[PERF] androidSdkVersion (DeviceInfoPlugin, cached): ${sw.elapsedMilliseconds}ms -> SDK $_cachedSdkVersion');
   return _cachedSdkVersion!;
 }
 
@@ -31,7 +39,7 @@ class PermissionService {
 
   Future<PermissionState> requestStoragePermission() async {
     if (Platform.isAndroid) {
-      final sdk = androidSdkVersion;
+      final sdk = await androidSdkVersion;
 
       if (sdk >= 30) {
         final sw = Stopwatch()..start();
@@ -54,7 +62,7 @@ class PermissionService {
 
   Future<PermissionState> checkStoragePermission() async {
     if (Platform.isAndroid) {
-      final sdk = androidSdkVersion;
+      final sdk = await androidSdkVersion;
 
       if (sdk >= 30) {
         final sw = Stopwatch()..start();

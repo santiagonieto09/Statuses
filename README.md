@@ -93,10 +93,10 @@ lib/
 
 | Capa | Tecnología |
 |------|-------------|
-| Framework | <img src="https://cdn.jsdelivr.net/npm/devicons@1.8.0/icons/flutter/flutter-original.svg" width="24" alt="Flutter"> Flutter **3.27+** |
-| Lenguaje | <img src="https://cdn.jsdelivr.net/npm/devicons@1.8.0/icons/dart/dart-original.svg" width="24" alt="Dart"> Dart **3.6+** |
-| Estado | Provider |
-| Almacenamiento | <img src="https://cdn.jsdelivr.net/npm/devicons@1.8.0/icons/android/android-original.svg" width="24" alt="Android"> `shared_preferences` + `path_provider` |
+| Framework | ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=flat&logo=flutter&logoColor=white) Flutter **3.27+** |
+| Lenguaje | ![Dart](https://img.shields.io/badge/Dart-0175C2?style=flat&logo=dart&logoColor=white) Dart **3.6+** |
+| Estado | ![Provider](https://img.shields.io/badge/Provider-4FC08D?style=flat&logo=flutter&logoColor=white) Provider |
+| Almacenamiento | ![Android](https://img.shields.io/badge/Android-3DDC84?style=flat&logo=android&logoColor=white) `shared_preferences` + `path_provider` |
 | Permisos | `permission_handler` |
 | Video | `video_player` + `video_thumbnail` |
 | Caché | `flutter_cache_manager` |

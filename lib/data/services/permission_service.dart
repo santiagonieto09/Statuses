@@ -9,11 +9,16 @@ enum PermissionState { granted, denied, permanentlyDenied }
 
 int? _cachedSdkVersion;
 DeviceInfoPlugin? _deviceInfo;
+Future<int>? _androidSdkVersionFuture;
 
 Future<int> get androidSdkVersion async {
   if (!Platform.isAndroid) return 0;
   if (_cachedSdkVersion != null) return _cachedSdkVersion!;
+  _androidSdkVersionFuture ??= _fetchAndroidSdkVersion();
+  return _androidSdkVersionFuture!;
+}
 
+Future<int> _fetchAndroidSdkVersion() async {
   final prefs = await SharedPreferences.getInstance();
   _cachedSdkVersion = prefs.getInt('cached_android_sdk_version');
   if (_cachedSdkVersion != null) {

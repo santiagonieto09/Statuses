@@ -104,7 +104,14 @@ class _AppShellState extends State<AppShell> {
     );
     final result = Scaffold(
       appBar: AppBar(
-        title: Text(t.app.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          t.app.title,
+          style: const TextStyle(
+            fontFamily: 'Montserrat',
+            fontWeight: FontWeight.w700,
+            fontSize: 22,
+          ),
+        ),
         centerTitle: false,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),

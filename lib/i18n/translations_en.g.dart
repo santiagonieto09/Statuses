@@ -318,6 +318,12 @@ class Translations$settings$en {
 	/// en: 'Toggle view'
 	String get toggle_view => 'Toggle view';
 
+	/// en: 'Grid'
+	String get view_mode_grid => 'Grid';
+
+	/// en: 'List'
+	String get view_mode_list => 'List';
+
 	/// en: 'Toggle theme'
 	String get toggle_theme => 'Toggle theme';
 
@@ -608,6 +614,8 @@ extension on Translations {
 			'settings.light' => 'Light',
 			'settings.dark' => 'Dark',
 			'settings.toggle_view' => 'Toggle view',
+			'settings.view_mode_grid' => 'Grid',
+			'settings.view_mode_list' => 'List',
 			'settings.toggle_theme' => 'Toggle theme',
 			'settings.notifications' => 'Notification Service',
 			'settings.notifications_description' => 'Periodically monitor statuses and notify you when new content is available.',

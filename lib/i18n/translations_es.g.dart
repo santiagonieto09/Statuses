@@ -192,6 +192,8 @@ class _Translations$settings$es extends Translations$settings$en {
 	@override String get light => 'Claro';
 	@override String get dark => 'Oscuro';
 	@override String get toggle_view => 'Cambiar vista';
+	@override String get view_mode_grid => 'Cuadrícula';
+	@override String get view_mode_list => 'Lista';
 	@override String get toggle_theme => 'Cambiar tema';
 	@override String get notifications => 'Servicio de notificaciones';
 	@override String get notifications_description => 'Monitorear periódicamente los estados y notificar cuando existan nuevos contenidos.';
@@ -343,6 +345,8 @@ extension on TranslationsEs {
 			'settings.light' => 'Claro',
 			'settings.dark' => 'Oscuro',
 			'settings.toggle_view' => 'Cambiar vista',
+			'settings.view_mode_grid' => 'Cuadrícula',
+			'settings.view_mode_list' => 'Lista',
 			'settings.toggle_theme' => 'Cambiar tema',
 			'settings.notifications' => 'Servicio de notificaciones',
 			'settings.notifications_description' => 'Monitorear periódicamente los estados y notificar cuando existan nuevos contenidos.',

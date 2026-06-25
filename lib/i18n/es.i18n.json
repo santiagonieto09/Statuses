@@ -78,6 +78,8 @@
     "light": "Claro",
     "dark": "Oscuro",
     "toggle_view": "Cambiar vista",
+    "view_mode_grid": "Cuadrícula",
+    "view_mode_list": "Lista",
     "toggle_theme": "Cambiar tema",
     "notifications": "Servicio de notificaciones",
     "notifications_description": "Monitorear peri\u00f3dicamente los estados y notificar cuando existan nuevos contenidos.",

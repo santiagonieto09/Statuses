@@ -78,6 +78,8 @@
     "light": "Light",
     "dark": "Dark",
     "toggle_view": "Toggle view",
+    "view_mode_grid": "Grid",
+    "view_mode_list": "List",
     "toggle_theme": "Toggle theme",
     "notifications": "Notification Service",
     "notifications_description": "Periodically monitor statuses and notify you when new content is available.",

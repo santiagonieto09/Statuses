@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/download_notifier.dart';
 import 'package:statuses/providers/notification_notifier.dart';
+import 'package:statuses/providers/status_notifier.dart';
 import 'package:statuses/providers/theme_notifier.dart';
 import 'package:statuses/ui/widgets/language_selector.dart';
 
@@ -20,6 +21,7 @@ class SettingsScreen extends StatelessWidget {
             _SectionHeader(title: t.settings.appearance),
             const LanguageSelector(),
             _ThemeTile(),
+            _ViewModeTile(),
             const Divider(),
             _SectionHeader(title: t.settings.notifications),
             _NotificationTile(),
@@ -112,6 +114,21 @@ class _ThemeTile extends StatelessWidget {
       ),
       value: themeNotifier.themeMode == ThemeMode.dark,
       onChanged: (_) => themeNotifier.toggleTheme(),
+    );
+  }
+}
+
+class _ViewModeTile extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final t = Translations.of(context);
+    final statusNotifier = context.watch<StatusNotifier>();
+    final isGrid = statusNotifier.viewMode == ViewMode.grid;
+    return ListTile(
+      leading: Icon(isGrid ? Icons.grid_view_rounded : Icons.view_list_rounded),
+      title: Text(t.settings.toggle_view),
+      subtitle: Text(isGrid ? t.settings.view_mode_grid : t.settings.view_mode_list),
+      onTap: () => context.read<StatusNotifier>().toggleViewMode(),
     );
   }
 }

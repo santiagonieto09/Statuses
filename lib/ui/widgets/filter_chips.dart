@@ -64,11 +64,15 @@ class FilterChips extends StatelessWidget {
       avatar: Icon(
         isSelected ? Icons.check_circle_rounded : icon,
         size: 16,
-        color: isSelected ? Colors.green : null,
+        color: isSelected ? Colors.white : null,
       ),
       selected: isSelected,
-      selectedColor: Colors.green,
+      selectedColor: Colors.green.shade600,
       backgroundColor: cs.surfaceContainerHighest,
+      side: isSelected ? const BorderSide(color: Colors.white, width: 1.5) : null,
+      shape: isSelected
+          ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
+          : null,
       onSelected: (_) => onSelected(),
       visualDensity: VisualDensity.compact,
       showCheckmark: false,

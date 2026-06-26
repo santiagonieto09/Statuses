@@ -116,13 +116,6 @@ class _AppShellState extends State<AppShell> {
             child: const FilterChips(),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_rounded),
-            tooltip: t.settings.title,
-            onPressed: () => Navigator.of(context).pushNamed('/settings'),
-          ),
-        ],
       ),
       body: IndexedStack(
         index: _currentIndex,
@@ -133,7 +126,13 @@ class _AppShellState extends State<AppShell> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (index) => setState(() => _currentIndex = index),
+        onDestinationSelected: (index) {
+          if (index == 2) {
+            Navigator.of(context).pushNamed('/settings');
+            return;
+          }
+          setState(() => _currentIndex = index);
+        },
         destinations: [
           NavigationDestination(
             icon: Badge(
@@ -160,6 +159,11 @@ class _AppShellState extends State<AppShell> {
               child: const Icon(Icons.download_rounded),
             ),
             label: t.nav.saved,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings_rounded),
+            label: t.settings.title,
           ),
         ],
       ),

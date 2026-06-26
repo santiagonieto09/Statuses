@@ -9,6 +9,7 @@ class FilterChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = Translations.of(context);
+    final cs = Theme.of(context).colorScheme;
     final filterMode = context.select<StatusNotifier, FilterMode>(
       (n) => n.filterMode,
     );
@@ -16,31 +17,61 @@ class FilterChips extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
       child: Row(
         children: [
-          ChoiceChip(
-            label: Text(t.filter.all),
-            avatar: const Icon(Icons.apps_rounded, size: 16),
-            selected: filterMode == FilterMode.all,
-            onSelected: (_) => context.read<StatusNotifier>().setFilterMode(FilterMode.all),
-            visualDensity: VisualDensity.compact,
+          _chip(
+            label: t.filter.all,
+            icon: Icons.apps_rounded,
+            isSelected: filterMode == FilterMode.all,
+            onSelected: () => context.read<StatusNotifier>().setFilterMode(FilterMode.all),
+            cs: cs,
           ),
           const SizedBox(width: 8),
-          ChoiceChip(
-            label: Text(t.filter.photos),
-            avatar: const Icon(Icons.image_rounded, size: 16),
-            selected: filterMode == FilterMode.photo,
-            onSelected: (_) => context.read<StatusNotifier>().setFilterMode(FilterMode.photo),
-            visualDensity: VisualDensity.compact,
+          _chip(
+            label: t.filter.photos,
+            icon: Icons.image_rounded,
+            isSelected: filterMode == FilterMode.photo,
+            onSelected: () => context.read<StatusNotifier>().setFilterMode(FilterMode.photo),
+            cs: cs,
           ),
           const SizedBox(width: 8),
-          ChoiceChip(
-            label: Text(t.filter.videos),
-            avatar: const Icon(Icons.videocam_rounded, size: 16),
-            selected: filterMode == FilterMode.video,
-            onSelected: (_) => context.read<StatusNotifier>().setFilterMode(FilterMode.video),
-            visualDensity: VisualDensity.compact,
+          _chip(
+            label: t.filter.videos,
+            icon: Icons.videocam_rounded,
+            isSelected: filterMode == FilterMode.video,
+            onSelected: () => context.read<StatusNotifier>().setFilterMode(FilterMode.video),
+            cs: cs,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _chip({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onSelected,
+    required ColorScheme cs,
+  }) {
+    return ChoiceChip(
+      label: AnimatedDefaultTextStyle(
+        duration: kThemeChangeDuration,
+        style: TextStyle(
+          color: isSelected ? Colors.white : null,
+          fontWeight: isSelected ? FontWeight.w600 : null,
+        ),
+        child: Text(label),
+      ),
+      avatar: Icon(
+        isSelected ? Icons.check_circle_rounded : icon,
+        size: 16,
+        color: isSelected ? Colors.green : null,
+      ),
+      selected: isSelected,
+      selectedColor: Colors.green,
+      backgroundColor: cs.surfaceContainerHighest,
+      onSelected: (_) => onSelected(),
+      visualDensity: VisualDensity.compact,
+      showCheckmark: false,
     );
   }
 }

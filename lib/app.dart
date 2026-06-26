@@ -58,8 +58,14 @@ class StatusesApp extends StatelessWidget {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        return FadeTransition(
-          opacity: animation,
+        return SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0.25, 0),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOut,
+          )),
           child: child,
         );
       },

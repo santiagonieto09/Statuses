@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.8.0] - 2026-06-27
+
+### Added
+- Splash: splash nativo Android 12+ con fondo #00A884 y logo centrado
+- Splash: generación automática con flutter_native_splash (Android <12 compat)
+- Icono: icono adaptativo generado desde el mismo logo (#00A884 background)
+- Assets: logo statuses.png (1254x1254) para splash e icono
+
+### Removed
+- Assets: logo.svg antiguo (reemplazado por statuses.png)
+
+---
+
 ## [1.7.0] - 2026-06-27
 
 ### Added

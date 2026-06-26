@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:statuses/data/models/status_file.dart';
+import 'package:statuses/data/services/video_thumbnail_service.dart';
 import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/download_notifier.dart';
 import 'package:statuses/ui/theme/app_theme.dart';
@@ -173,16 +174,44 @@ class _StatusDetailScreenState extends State<StatusDetailScreen> {
         );
       case MediaType.video:
         if (!isActive || !_isVideoInitialized || _videoController == null) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const CircularProgressIndicator(color: Colors.white54),
-                const SizedBox(height: 16),
-                Text(t.detail.loading_video,
-                    style: const TextStyle(color: Colors.white70)),
-              ],
-            ),
+          return FutureBuilder<String?>(
+            future: VideoThumbnailService.instance.getThumbnail(status.filePath),
+            builder: (context, snapshot) {
+              final thumbPath = snapshot.data;
+              if (thumbPath != null) {
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.file(
+                      File(thumbPath),
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                    const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white54,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(color: Colors.white54),
+                    const SizedBox(height: 16),
+                    Text(t.detail.loading_video,
+                        style: const TextStyle(color: Colors.white70)),
+                  ],
+                ),
+              );
+            },
           );
         }
         return Center(

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'package:crypto/crypto.dart';
 
 enum MediaType { image, video, unknown }
@@ -59,13 +60,7 @@ class FileUtils {
   }
 
   static Future<String> computeFileHash(String filePath) async {
-    final file = File(filePath);
-    final length = await file.length();
-    if (length > 10 * 1024 * 1024) {
-      return _computePartialHash(file, length);
-    }
-    final bytes = await file.readAsBytes();
-    return sha256.convert(bytes).toString();
+    return Isolate.run(() => computeFileHashSync(filePath));
   }
 
   static String computeFileHashSync(String filePath) {
@@ -78,17 +73,11 @@ class FileUtils {
     return sha256.convert(bytes).toString();
   }
 
-  static Future<String> _computePartialHash(File file, int length) async {
-    final bytes = await file.readAsBytes();
-    final chunk = bytes.take(_partialHashSize).toList();
-    final hash = sha256.convert(chunk).toString();
-    return '$hash|$length';
-  }
-
   static String _computePartialHashSync(File file, int length) {
-    final bytes = file.readAsBytesSync();
-    final chunk = bytes.take(_partialHashSize).toList();
-    final hash = sha256.convert(chunk).toString();
+    final raf = file.openSync(mode: FileMode.read);
+    final bytes = raf.readSync(_partialHashSize);
+    raf.closeSync();
+    final hash = sha256.convert(bytes).toString();
     return '$hash|$length';
   }
 

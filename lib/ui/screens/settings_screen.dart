@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/download_notifier.dart';
@@ -43,11 +44,7 @@ class SettingsScreen extends StatelessWidget {
               title: Text(t.settings.app_name),
               subtitle: Text(t.settings.app_description),
             ),
-            ListTile(
-              leading: const Icon(Icons.tag_rounded),
-              title: Text(t.settings.version),
-              trailing: const Text('1.0.0+1'),
-            ),
+            _VersionTile(),
           ],
         ),
       ),
@@ -129,6 +126,33 @@ class _ViewModeTile extends StatelessWidget {
       title: Text(t.settings.toggle_view),
       subtitle: Text(isGrid ? t.settings.view_mode_grid : t.settings.view_mode_list),
       onTap: () => context.read<StatusNotifier>().toggleViewMode(),
+    );
+  }
+}
+
+class _VersionTile extends StatefulWidget {
+  @override
+  State<_VersionTile> createState() => _VersionTileState();
+}
+
+class _VersionTileState extends State<_VersionTile> {
+  String? _version;
+
+  @override
+  void initState() {
+    super.initState();
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) setState(() => _version = '${info.version}+${info.buildNumber}');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Translations.of(context);
+    return ListTile(
+      leading: const Icon(Icons.tag_rounded),
+      title: Text(t.settings.version),
+      trailing: Text(_version ?? ''),
     );
   }
 }

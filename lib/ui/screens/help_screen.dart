@@ -50,14 +50,6 @@ class HelpScreen extends StatelessWidget {
               title: t.help.dark_mode_title,
               body: t.help.dark_mode_body,
             ),
-            const SizedBox(height: 24),
-            Text(
-              t.help.notification_service_title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
-            const SizedBox(height: 12),
             _HelpCard(
               icon: Icons.notifications_active_rounded,
               title: t.help.notification_service_title,

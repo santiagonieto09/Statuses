@@ -53,30 +53,45 @@ class FilterChips extends StatelessWidget {
     required VoidCallback onSelected,
     required ColorScheme cs,
   }) {
-    return ChoiceChip(
-      label: AnimatedDefaultTextStyle(
-        duration: kThemeChangeDuration,
-        style: TextStyle(
-          color: isSelected ? Colors.white : null,
-          fontWeight: isSelected ? FontWeight.w600 : null,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      decoration: BoxDecoration(
+        color: isSelected ? AppColors.accentGreen : cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isSelected ? Colors.white : Colors.transparent,
+          width: 1.5,
         ),
-        child: Text(label),
       ),
-      avatar: Icon(
-        isSelected ? Icons.check_circle_rounded : icon,
-        size: 16,
-        color: isSelected ? Colors.white : null,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onSelected,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  isSelected ? Icons.check_circle_rounded : icon,
+                  size: 16,
+                  color: isSelected ? Colors.white : null,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : null,
+                    fontWeight: isSelected ? FontWeight.w600 : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
-      selected: isSelected,
-      selectedColor: AppColors.accentGreen,
-      backgroundColor: cs.surfaceContainerHighest,
-      side: isSelected ? const BorderSide(color: Colors.white, width: 1.5) : null,
-      shape: isSelected
-          ? RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))
-          : null,
-      onSelected: (_) => onSelected(),
-      visualDensity: VisualDensity.compact,
-      showCheckmark: false,
     );
   }
 }

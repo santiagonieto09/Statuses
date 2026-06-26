@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/status_notifier.dart';
+import 'package:statuses/ui/theme/app_theme.dart';
 
 class FilterChips extends StatelessWidget {
   const FilterChips({super.key});
@@ -67,7 +68,7 @@ class FilterChips extends StatelessWidget {
         color: isSelected ? Colors.white : null,
       ),
       selected: isSelected,
-      selectedColor: Colors.green.shade600,
+      selectedColor: AppColors.accentGreen,
       backgroundColor: cs.surfaceContainerHighest,
       side: isSelected ? const BorderSide(color: Colors.white, width: 1.5) : null,
       shape: isSelected

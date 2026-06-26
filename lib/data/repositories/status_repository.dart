@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'package:flutter/foundation.dart';
 import 'package:statuses/constants/app_constants.dart';
 import 'package:statuses/data/models/status_file.dart';
@@ -41,7 +42,7 @@ class StatusRepository {
     final dirs = await _discoverDirectories();
 
     if (dirs.isNotEmpty) {
-      final result = _loadFromDirectories(dirs);
+      final result = await Isolate.run(() => _loadFromDirectoriesSync(dirs));
       debugPrint('[PERF] StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (direct, ${result.length} files)');
       _metadataCache = result;
       _cacheTime = DateTime.now();
@@ -59,62 +60,6 @@ class StatusRepository {
 
     debugPrint('[PERF] StatusRepository.loadStatuses: ${sw.elapsedMilliseconds}ms (no directories found)');
     return [];
-  }
-
-  List<StatusFile> _loadFromDirectories(List<String> dirs) {
-    final totalSw = Stopwatch()..start();
-    final seenNames = <String>{};
-    final statusFiles = <StatusFile>[];
-    int statCount = 0;
-
-    for (final dirPath in dirs) {
-      final dirSw = Stopwatch()..start();
-      int filesInDir = 0;
-
-      try {
-        final entities = Directory(dirPath).listSync(followLinks: false);
-        final listTime = dirSw.elapsedMilliseconds;
-
-        for (final entity in entities) {
-          if (entity is! File) continue;
-          final name = entity.uri.pathSegments.last;
-          if (!seenNames.add(name.toLowerCase())) continue;
-
-          final ext =
-              name.contains('.') ? '.${name.split('.').last.toLowerCase()}' : '';
-          final mediaType = FileUtils.detectMediaType(ext);
-          if (mediaType != MediaType.image && mediaType != MediaType.video) {
-            continue;
-          }
-
-          final stat = entity.statSync();
-          statCount++;
-
-          statusFiles.add(StatusFile(
-            filePath: entity.path,
-            fileName: name,
-            extension: ext,
-            fileSize: stat.size,
-            lastModified: stat.modified,
-            mediaType: mediaType,
-          ));
-          filesInDir++;
-        }
-
-        debugPrint('[PERF] StatusRepository._loadFromDirectories: dir=$dirPath '
-            'listSync=${listTime}ms, files=$filesInDir');
-      } catch (e) {
-        debugPrint('[PERF] StatusRepository._loadFromDirectories: error en $dirPath: $e');
-      }
-    }
-
-    statusFiles.sort((a, b) => b.lastModified.compareTo(a.lastModified));
-    final total = totalSw.elapsedMilliseconds;
-    debugPrint('[PERF] StatusRepository._loadFromDirectories: '
-        'total=$total ms, '
-        'statSync=$statCount archivos, '
-        'media=${statusFiles.isNotEmpty ? (total / statusFiles.length).toStringAsFixed(1) : "0"}ms/archivo');
-    return statusFiles;
   }
 
   Future<bool> hasStatusDirectory() async {
@@ -138,4 +83,60 @@ class StatusRepository {
     final sourceFile = File(status.filePath);
     await sourceFile.copy(destFile.path);
   }
+}
+
+List<StatusFile> _loadFromDirectoriesSync(List<String> dirs) {
+  final totalSw = Stopwatch()..start();
+  final seenNames = <String>{};
+  final statusFiles = <StatusFile>[];
+  int statCount = 0;
+
+  for (final dirPath in dirs) {
+    final dirSw = Stopwatch()..start();
+    int filesInDir = 0;
+
+    try {
+      final entities = Directory(dirPath).listSync(followLinks: false);
+      final listTime = dirSw.elapsedMilliseconds;
+
+      for (final entity in entities) {
+        if (entity is! File) continue;
+        final name = entity.uri.pathSegments.last;
+        if (!seenNames.add(name.toLowerCase())) continue;
+
+        final ext =
+            name.contains('.') ? '.${name.split('.').last.toLowerCase()}' : '';
+        final mediaType = FileUtils.detectMediaType(ext);
+        if (mediaType != MediaType.image && mediaType != MediaType.video) {
+          continue;
+        }
+
+        final stat = entity.statSync();
+        statCount++;
+
+        statusFiles.add(StatusFile(
+          filePath: entity.path,
+          fileName: name,
+          extension: ext,
+          fileSize: stat.size,
+          lastModified: stat.modified,
+          mediaType: mediaType,
+        ));
+        filesInDir++;
+      }
+
+      debugPrint('[PERF] StatusRepository._loadFromDirectories: dir=$dirPath '
+          'listSync=${listTime}ms, files=$filesInDir');
+    } catch (e) {
+      debugPrint('[PERF] StatusRepository._loadFromDirectories: error en $dirPath: $e');
+    }
+  }
+
+  statusFiles.sort((a, b) => b.lastModified.compareTo(a.lastModified));
+  final total = totalSw.elapsedMilliseconds;
+  debugPrint('[PERF] StatusRepository._loadFromDirectories: '
+      'total=$total ms, '
+      'statSync=$statCount archivos, '
+      'media=${statusFiles.isNotEmpty ? (total / statusFiles.length).toStringAsFixed(1) : "0"}ms/archivo');
+  return statusFiles;
 }

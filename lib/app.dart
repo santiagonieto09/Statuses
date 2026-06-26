@@ -60,11 +60,11 @@ class StatusesApp extends StatelessWidget {
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return SlideTransition(
           position: Tween<Offset>(
-            begin: const Offset(0.25, 0),
+            begin: const Offset(0.12, 0),
             end: Offset.zero,
           ).animate(CurvedAnimation(
             parent: animation,
-            curve: Curves.easeOut,
+            curve: Curves.easeInOut,
           )),
           child: child,
         );

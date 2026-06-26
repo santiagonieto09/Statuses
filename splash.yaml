@@ -1,0 +1,17 @@
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+
+  color: "#00A884"
+  image: assets/images/statuses.png
+
+  android_gravity: center
+  ios_content_mode: center
+
+  android_12:
+    image: assets/images/statuses.png
+    color: "#00A884"
+    icon_background_color: "#00A884"
+
+  fullscreen: true

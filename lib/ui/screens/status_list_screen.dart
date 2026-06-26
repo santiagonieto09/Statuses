@@ -6,7 +6,6 @@ import 'package:statuses/i18n/translations.g.dart';
 import 'package:statuses/providers/status_notifier.dart';
 import 'package:statuses/ui/screens/status_detail_screen.dart';
 import 'package:statuses/ui/widgets/empty_state.dart';
-import 'package:statuses/ui/widgets/shimmer_loading.dart';
 import 'package:statuses/ui/widgets/status_thumbnail_card.dart';
 
 final _listBuildSw = Stopwatch();
@@ -22,7 +21,9 @@ class StatusListScreen extends StatelessWidget {
       (n) => n.isLoading,
     );
     if (isLoading) {
-      return const ShimmerLoading(isGrid: false);
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     }
 
     final statuses = context.select<StatusNotifier, List<StatusFile>>(

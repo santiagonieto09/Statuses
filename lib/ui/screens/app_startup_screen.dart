@@ -32,36 +32,25 @@ class _AppStartupScreenState extends State<AppStartupScreen> {
 
     if (!mounted) return;
 
-    developer.Timeline.timeSync('pushReplacementNamed(/home)', () {
-      if (state == PermissionState.granted) {
-        Navigator.of(context).pushReplacementNamed('/home');
-      } else {
-        Navigator.of(context).pushReplacementNamed(
-          '/permission',
-          arguments: state,
-        );
-      }
-    });
+    if (state == PermissionState.granted) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    } else {
+      Navigator.of(context).pushReplacementNamed(
+        '/permission',
+        arguments: state,
+      );
+    }
+
     final navTime = sw.elapsedMilliseconds;
-    debugPrint('[PERF] pushReplacementNamed completado: ${navTime}ms');
+    debugPrint('[PERF] startup completado: ${navTime}ms');
     _startupTask.finish();
   }
 
   @override
   Widget build(BuildContext context) {
     debugPrint('[PERF] AppStartupScreen.build');
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: const Center(
-        child: SizedBox(
-          width: 32,
-          height: 32,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.5,
-            color: AppColors.primaryDark,
-          ),
-        ),
-      ),
+    return const Scaffold(
+      backgroundColor: AppColors.accentGreen,
     );
   }
 }

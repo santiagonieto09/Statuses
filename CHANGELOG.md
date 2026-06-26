@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.7.0] - 2026-06-27
+
+### Added
+- UI: versión dinámica desde la plataforma con package_info_plus (Settings)
+- UI: filtros con check verde relleno (AppColors.accentGreen) y check/borde blanco
+
+### Fixed
+- Versión hardcodeada en Settings ahora se lee automáticamente del pubspec.yaml
+
+---
+
 ## [1.6.0] - 2026-06-26
 
 ### Added

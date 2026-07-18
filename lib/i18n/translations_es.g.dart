@@ -406,7 +406,7 @@ extension on TranslationsEs {
 			'help.faq_encrypted_names_q' => '¿Por qué los archivos tienen nombres extraños?',
 			'help.faq_encrypted_names_a' => 'WhatsApp almacena temporalmente los estados utilizando nombres internos generados automáticamente por el sistema. Estos nombres no corresponden al nombre original del archivo y son utilizados por WhatsApp para optimizar el almacenamiento y la gestión del contenido. Esto es completamente normal y no afecta la visualización ni el funcionamiento de los estados.',
 			'help.faq_duplicates_q' => '¿Por qué veo estados duplicados?',
-			'help.faq_duplicates_a' => 'La app ahora previene duplicados verificando nombre, tamaño y hash de contenido. Si ves duplicados de antes de esta actualización, son archivos existentes guardados previamente. Puedes eliminarlos manualmente desde la pestaña Guardados.',
+			'help.faq_duplicates_a' => 'A veces aparecen archivos que parecen duplicados porque varios contactos han publicado o compartido el mismo estado. La aplicación guarda cada copia que recibe, por eso verás varias entradas idénticas aunque provengan del mismo contenido. Puedes eliminar copias no deseadas desde la pestaña Guardados.',
 			'help.faq_notifications_q' => '¿Cómo funcionan las notificaciones?',
 			'help.faq_notifications_a' => 'Al activarlas en Configuración, la app verifica nuevos estados cada 60 segundos. Si encuentra contenido nuevo, muestra una notificación. Puedes activarlas o desactivarlas en cualquier momento.',
 			'help.faq_auto_save_q' => '¿Qué hace exactamente el guardado automático?',

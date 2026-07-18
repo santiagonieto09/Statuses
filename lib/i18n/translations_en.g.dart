@@ -510,8 +510,8 @@ class Translations$help$en {
 	/// en: 'Why do I see duplicate statuses?'
 	String get faq_duplicates_q => 'Why do I see duplicate statuses?';
 
-	/// en: 'Sometimes files may look duplicated because multiple contacts posted or shared the same status. The app saves each copy it receives, so you\'ll see several identical entries even though they come from the same content. You can remove unwanted copies from the Saved tab.'
-	String get faq_duplicates_a => 'The app now prevents duplicates by checking file name, size, and content hash. If you see duplicates from before this update, they are existing files that were saved previously. You can delete them manually from the Saved tab.';
+	/// en: 'Sometimes files may look duplicated because multiple contacts posted or shared the same status. The app saves each copy it receives, so you'll see several identical entries even though they come from the same content. You can remove unwanted copies from the Saved tab.'
+	String get faq_duplicates_a => 'Sometimes files may look duplicated because multiple contacts posted or shared the same status. The app saves each copy it receives, so you\'ll see several identical entries even though they come from the same content. You can remove unwanted copies from the Saved tab.';
 
 	/// en: 'How do notifications work?'
 	String get faq_notifications_q => 'How do notifications work?';

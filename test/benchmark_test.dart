@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:statuses/data/models/status_file.dart';
-import 'package:statuses/data/repositories/status_repository.dart';
 import 'package:statuses/utils/file_utils.dart';
 import 'mocks.dart';
 

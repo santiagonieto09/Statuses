@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:statuses/data/models/status_file.dart';
 import 'package:statuses/utils/file_utils.dart';
-import 'mocks.dart';
-
 void main() {
   group('Stress: 500+ archivos', () {
     late Directory tempDir;

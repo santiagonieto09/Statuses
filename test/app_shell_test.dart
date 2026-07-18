@@ -36,7 +36,7 @@ void main() {
     await tester.pumpWidget(createTestApp());
 
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.byType(NavigationDestination), findsNWidgets(2));
+    expect(find.byType(NavigationDestination), findsNWidgets(3));
   });
 
   testWidgets('NavigationBar has stories and saved tabs', (tester) async {
@@ -50,6 +50,6 @@ void main() {
   testWidgets('Setting icon is present', (tester) async {
     await tester.pumpWidget(createTestApp());
 
-    expect(find.byIcon(Icons.settings_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
   });
 }

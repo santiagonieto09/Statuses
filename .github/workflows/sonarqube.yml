@@ -48,10 +48,5 @@ jobs:
             -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/.dart_tool/**,build/**
             -Dsonar.test.inclusions=test/**/*_test.dart
             -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
-
-      - name: Quality gate
-        uses: SonarSource/sonarqube-quality-gate-action@v1.2.1
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=300

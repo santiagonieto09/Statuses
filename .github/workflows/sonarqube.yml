@@ -41,7 +41,7 @@ jobs:
           projectBaseDir: .
           args: >
             -Dsonar.organization=santiagonieto09
-            -Dsonar.projectKey=santiagonieto09_Statuses
+            -Dsonar.projectKey=statuses
             -Dsonar.projectName=Statuses
             -Dsonar.sources=lib
             -Dsonar.tests=test
@@ -50,9 +50,3 @@ jobs:
             -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=300
-            -Dsonar.verbose=true
-
-      - name: Show scan report
-        if: always()
-        run: |
-          cat .scannerwork/report-task.txt 2>/dev/null || echo "report-task.txt not found"

@@ -47,6 +47,6 @@ jobs:
             -Dsonar.tests=test
             -Dsonar.exclusions=**/*.g.dart,**/*.freezed.dart,**/.dart_tool/**,build/**
             -Dsonar.test.inclusions=test/**/*_test.dart
-            -Dsonar.dart.coverage.reportPaths=coverage/lcov.info
+            -Dsonar.dart.lcov.reportPaths=coverage/lcov.info
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=300
